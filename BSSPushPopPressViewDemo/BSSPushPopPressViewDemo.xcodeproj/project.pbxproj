@@ -1,0 +1,304 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5B92536613D858C600E5FD25 /* BSSPushPopPressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B92536513D858C600E5FD25 /* BSSPushPopPressView.m */; };
+		5B92536813D858CF00E5FD25 /* sampleimage.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5B92536713D858CF00E5FD25 /* sampleimage.jpg */; };
+		5BC7305813D858840079A0D8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305713D858840079A0D8 /* UIKit.framework */; };
+		5BC7305A13D858840079A0D8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305913D858840079A0D8 /* Foundation.framework */; };
+		5BC7305C13D858840079A0D8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305B13D858840079A0D8 /* CoreGraphics.framework */; };
+		5BC7306213D858840079A0D8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5BC7306013D858840079A0D8 /* InfoPlist.strings */; };
+		5BC7306413D858840079A0D8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BC7306313D858840079A0D8 /* main.m */; };
+		5BC7306813D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BC7306713D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.m */; };
+		5BC7306B13D858840079A0D8 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5BC7306913D858840079A0D8 /* MainWindow.xib */; };
+		5BC7306E13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BC7306D13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.m */; };
+		5BC7307113D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5BC7306F13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		5B92536413D858C600E5FD25 /* BSSPushPopPressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BSSPushPopPressView.h; path = ../../BSSPushPopPressView.h; sourceTree = "<group>"; };
+		5B92536513D858C600E5FD25 /* BSSPushPopPressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BSSPushPopPressView.m; path = ../../BSSPushPopPressView.m; sourceTree = "<group>"; };
+		5B92536713D858CF00E5FD25 /* sampleimage.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sampleimage.jpg; sourceTree = "<group>"; };
+		5BC7305313D858840079A0D8 /* BSSPushPopPressViewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BSSPushPopPressViewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5BC7305713D858840079A0D8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		5BC7305913D858840079A0D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		5BC7305B13D858840079A0D8 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		5BC7305F13D858840079A0D8 /* BSSPushPopPressViewDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BSSPushPopPressViewDemo-Info.plist"; sourceTree = "<group>"; };
+		5BC7306113D858840079A0D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5BC7306313D858840079A0D8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		5BC7306513D858840079A0D8 /* BSSPushPopPressViewDemo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BSSPushPopPressViewDemo-Prefix.pch"; sourceTree = "<group>"; };
+		5BC7306613D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BSSPushPopPressViewDemoAppDelegate.h; sourceTree = "<group>"; };
+		5BC7306713D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BSSPushPopPressViewDemoAppDelegate.m; sourceTree = "<group>"; };
+		5BC7306A13D858840079A0D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
+		5BC7306C13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BSSPushPopPressViewDemoViewController.h; sourceTree = "<group>"; };
+		5BC7306D13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BSSPushPopPressViewDemoViewController.m; sourceTree = "<group>"; };
+		5BC7307013D858840079A0D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/BSSPushPopPressViewDemoViewController.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5BC7305013D858840079A0D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5BC7305813D858840079A0D8 /* UIKit.framework in Frameworks */,
+				5BC7305A13D858840079A0D8 /* Foundation.framework in Frameworks */,
+				5BC7305C13D858840079A0D8 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5BC7304813D858830079A0D8 = {
+			isa = PBXGroup;
+			children = (
+				5BC7305D13D858840079A0D8 /* BSSPushPopPressViewDemo */,
+				5BC7305613D858840079A0D8 /* Frameworks */,
+				5BC7305413D858840079A0D8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5BC7305413D858840079A0D8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5BC7305313D858840079A0D8 /* BSSPushPopPressViewDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5BC7305613D858840079A0D8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5BC7305713D858840079A0D8 /* UIKit.framework */,
+				5BC7305913D858840079A0D8 /* Foundation.framework */,
+				5BC7305B13D858840079A0D8 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5BC7305D13D858840079A0D8 /* BSSPushPopPressViewDemo */ = {
+			isa = PBXGroup;
+			children = (
+				5B92536413D858C600E5FD25 /* BSSPushPopPressView.h */,
+				5B92536513D858C600E5FD25 /* BSSPushPopPressView.m */,
+				5BC7306613D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.h */,
+				5BC7306713D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.m */,
+				5BC7306913D858840079A0D8 /* MainWindow.xib */,
+				5BC7306C13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.h */,
+				5BC7306D13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.m */,
+				5BC7306F13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib */,
+				5BC7305E13D858840079A0D8 /* Supporting Files */,
+			);
+			path = BSSPushPopPressViewDemo;
+			sourceTree = "<group>";
+		};
+		5BC7305E13D858840079A0D8 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5B92536713D858CF00E5FD25 /* sampleimage.jpg */,
+				5BC7305F13D858840079A0D8 /* BSSPushPopPressViewDemo-Info.plist */,
+				5BC7306013D858840079A0D8 /* InfoPlist.strings */,
+				5BC7306313D858840079A0D8 /* main.m */,
+				5BC7306513D858840079A0D8 /* BSSPushPopPressViewDemo-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5BC7305213D858840079A0D8 /* BSSPushPopPressViewDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5BC7307413D858840079A0D8 /* Build configuration list for PBXNativeTarget "BSSPushPopPressViewDemo" */;
+			buildPhases = (
+				5BC7304F13D858840079A0D8 /* Sources */,
+				5BC7305013D858840079A0D8 /* Frameworks */,
+				5BC7305113D858840079A0D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BSSPushPopPressViewDemo;
+			productName = BSSPushPopPressViewDemo;
+			productReference = 5BC7305313D858840079A0D8 /* BSSPushPopPressViewDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5BC7304A13D858830079A0D8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "Blacksmith Software";
+			};
+			buildConfigurationList = 5BC7304D13D858830079A0D8 /* Build configuration list for PBXProject "BSSPushPopPressViewDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 5BC7304813D858830079A0D8;
+			productRefGroup = 5BC7305413D858840079A0D8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5BC7305213D858840079A0D8 /* BSSPushPopPressViewDemo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5BC7305113D858840079A0D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5BC7306213D858840079A0D8 /* InfoPlist.strings in Resources */,
+				5BC7306B13D858840079A0D8 /* MainWindow.xib in Resources */,
+				5BC7307113D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib in Resources */,
+				5B92536813D858CF00E5FD25 /* sampleimage.jpg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5BC7304F13D858840079A0D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5BC7306413D858840079A0D8 /* main.m in Sources */,
+				5BC7306813D858840079A0D8 /* BSSPushPopPressViewDemoAppDelegate.m in Sources */,
+				5BC7306E13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.m in Sources */,
+				5B92536613D858C600E5FD25 /* BSSPushPopPressView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		5BC7306013D858840079A0D8 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5BC7306113D858840079A0D8 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		5BC7306913D858840079A0D8 /* MainWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5BC7306A13D858840079A0D8 /* en */,
+			);
+			name = MainWindow.xib;
+			sourceTree = "<group>";
+		};
+		5BC7306F13D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5BC7307013D858840079A0D8 /* en */,
+			);
+			name = BSSPushPopPressViewDemoViewController.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		5BC7307213D858840079A0D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		5BC7307313D858840079A0D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5BC7307513D858840079A0D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BSSPushPopPressViewDemo/BSSPushPopPressViewDemo-Prefix.pch";
+				INFOPLIST_FILE = "BSSPushPopPressViewDemo/BSSPushPopPressViewDemo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		5BC7307613D858840079A0D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BSSPushPopPressViewDemo/BSSPushPopPressViewDemo-Prefix.pch";
+				INFOPLIST_FILE = "BSSPushPopPressViewDemo/BSSPushPopPressViewDemo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5BC7304D13D858830079A0D8 /* Build configuration list for PBXProject "BSSPushPopPressViewDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5BC7307213D858840079A0D8 /* Debug */,
+				5BC7307313D858840079A0D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5BC7307413D858840079A0D8 /* Build configuration list for PBXNativeTarget "BSSPushPopPressViewDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5BC7307513D858840079A0D8 /* Debug */,
+				5BC7307613D858840079A0D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5BC7304A13D858830079A0D8 /* Project object */;
+}
