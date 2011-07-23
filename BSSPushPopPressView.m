@@ -27,6 +27,7 @@
 //
 
 #import "BSSPushPopPressView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation BSSPushPopPressView
 
@@ -65,11 +66,27 @@
     return self;
 }
 
+- (void) moveViewToOriginalPosition {
+    [UIView beginAnimations: nil context: nil];
+    [UIView setAnimationBeginsFromCurrentState: YES];
+    rotateTransform = CGAffineTransformIdentity;
+    panTransform = CGAffineTransformIdentity;
+    scaleTransform = CGAffineTransformIdentity;
+    self.transform = CGAffineTransformIdentity;
+    self.frame = initialFrame;
+    [UIView commitAnimations];
+}
+
 - (void) pinch: (UIPinchGestureRecognizer*) pinch {
     switch (pinch.state) {
-        case UIGestureRecognizerStateBegan: { break; }
+        case UIGestureRecognizerStateBegan: { 
+            gestureRecognizersWereCancelled = NO;
+            break; }
         case UIGestureRecognizerStatePossible: { break; }
-        case UIGestureRecognizerStateCancelled: { break; }
+        case UIGestureRecognizerStateCancelled: {
+            gestureRecognizersWereCancelled = YES;
+            [self moveViewToOriginalPosition];
+        } break;
         case UIGestureRecognizerStateFailed: { break; }
         case UIGestureRecognizerStateChanged: {
             scaleTransform = CGAffineTransformScale(CGAffineTransformIdentity, pinch.scale, pinch.scale);
@@ -77,38 +94,42 @@
             break;
         }
         case UIGestureRecognizerStateEnded: {
-            [UIView beginAnimations: nil context: nil];
-            [UIView setAnimationBeginsFromCurrentState: YES];
+            gestureRecognizersWereCancelled = YES;
+            
             if (pinch.velocity >= 15.0) {
+                [UIView beginAnimations: nil context: nil];
                 scaleTransform = CGAffineTransformIdentity;
                 rotateTransform = CGAffineTransformIdentity;
                 panTransform = CGAffineTransformIdentity;
                 self.transform = CGAffineTransformIdentity;
                 self.frame = self.window.bounds;
-            } else if (pinch.scale * initialFrame.size.width > (self.window.bounds.size.width * 0.75)) {
+                [UIView commitAnimations];
+            } else if (pinch.scale * self.frame.size.width > (self.window.bounds.size.width * 0.75)) {
+                [UIView beginAnimations: nil context: nil];
+                [UIView setAnimationBeginsFromCurrentState: YES];
                 scaleTransform = CGAffineTransformIdentity;
                 rotateTransform = CGAffineTransformIdentity;
                 panTransform = CGAffineTransformIdentity;
                 self.transform = CGAffineTransformIdentity;
                 self.frame = self.window.bounds;                
+                [UIView commitAnimations];
             } else {
-                rotateTransform = CGAffineTransformIdentity;
-                panTransform = CGAffineTransformIdentity;
-                scaleTransform = CGAffineTransformIdentity;
-                self.transform = CGAffineTransformIdentity;
-                self.frame = initialFrame;
+                [self moveViewToOriginalPosition];
             }
-            [UIView commitAnimations];
             break; 
         }
     }
 }
 
 - (void) rotate: (UIRotationGestureRecognizer*) rotate {
+    if (gestureRecognizersWereCancelled) return;
+    
     switch (rotate.state) {
         case UIGestureRecognizerStateBegan: { break; }
         case UIGestureRecognizerStatePossible: { break; }
-        case UIGestureRecognizerStateCancelled: { break; }
+        case UIGestureRecognizerStateCancelled: { 
+            [self moveViewToOriginalPosition];
+        } break;
         case UIGestureRecognizerStateFailed: { break; }
         case UIGestureRecognizerStateChanged: {
             rotateTransform = CGAffineTransformRotate(CGAffineTransformIdentity, rotate.rotation);
@@ -123,10 +144,14 @@
 }
 
 - (void) pan: (UIPanGestureRecognizer*) pan {
+    if (gestureRecognizersWereCancelled) return;
+    
     switch (pan.state) {
         case UIGestureRecognizerStateBegan: { break; }
         case UIGestureRecognizerStatePossible: { break; }
-        case UIGestureRecognizerStateCancelled: { break; }
+        case UIGestureRecognizerStateCancelled: { 
+            [self moveViewToOriginalPosition];
+        } break;
         case UIGestureRecognizerStateFailed: { break; }
         case UIGestureRecognizerStateChanged: {
             CGPoint translation = [pan translationInView: self.superview];
@@ -143,17 +168,26 @@
 }
 
 - (void) tap: (UITapGestureRecognizer*) tap {
-    [UIView beginAnimations: nil context: nil];
-    [UIView setAnimationBeginsFromCurrentState: YES];
     if (CGRectEqualToRect(self.frame, initialFrame)) {
-        self.frame = self.window.bounds;
+        [UIView animateWithDuration: 0.35 animations: ^{
+            self.frame = CGRectMake(self.window.bounds.origin.x - 15, self.window.bounds.origin.y - 15, self.window.bounds.size.width + 30, self.window.bounds.size.height + 30);
+        } completion: ^(BOOL finished) {
+            [UIView animateWithDuration: 0.2 animations: ^{
+                self.frame = self.window.bounds;
+            }];
+        }];
     } else {
-        self.frame = initialFrame;
+        [UIView animateWithDuration: 0.35 animations: ^{
+            self.frame = CGRectMake(initialFrame.origin.x + 4, initialFrame.origin.y + 4, initialFrame.size.width - 8, initialFrame.size.height - 8);
+        } completion: ^(BOOL finished) {
+            [UIView animateWithDuration: 0.15 animations: ^{
+                self.frame = initialFrame;
+            }];
+        }];
     }
-    [UIView commitAnimations];
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+- (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer {
     return YES;
 }
 

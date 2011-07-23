@@ -33,6 +33,8 @@
     CGAffineTransform rotateTransform;
     CGAffineTransform panTransform;
     CGRect initialFrame;
+    
+    BOOL gestureRecognizersWereCancelled;
 }
 
 @end
