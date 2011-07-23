@@ -28,13 +28,26 @@
 
 #import <Foundation/Foundation.h>
 
+@class BSSPushPopPressView;
+
+@protocol BSSPushPopPressViewDelegate<NSObject>
+@optional
+- (void) bssPushPopPressViewDidStartManipulation: (BSSPushPopPressView*) pushPopPressView;
+- (void) bssPushPopPressViewDidFinishManipulation: (BSSPushPopPressView*) pushPopPressView;
+@end
+
 @interface BSSPushPopPressView : UIView<UIGestureRecognizerDelegate> {
     CGAffineTransform scaleTransform;
     CGAffineTransform rotateTransform;
     CGAffineTransform panTransform;
     CGRect initialFrame;
     
+    BOOL scaleBegan;
+    BOOL rotateBegan;
+    BOOL panBegan;
+    
     BOOL gestureRecognizersWereCancelled;
 }
 
+@property (nonatomic, assign) id<BSSPushPopPressViewDelegate> delegate;
 @end

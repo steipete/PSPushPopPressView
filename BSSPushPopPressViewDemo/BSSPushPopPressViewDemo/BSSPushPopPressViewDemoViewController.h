@@ -5,7 +5,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BSSPushPopPressView.h"
 
-@interface BSSPushPopPressViewDemoViewController : UIViewController
+@interface BSSPushPopPressViewDemoViewController : UIViewController<BSSPushPopPressViewDelegate>
 
+@property (nonatomic, retain) UIView* contentView;
 @end

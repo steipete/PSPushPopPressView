@@ -31,6 +31,8 @@
 
 @implementation BSSPushPopPressView
 
+@synthesize delegate;
+
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
         self.userInteractionEnabled = YES;
@@ -66,6 +68,11 @@
     return self;
 }
 
+- (void) dealloc {
+    delegate = nil;
+    [super dealloc];
+}
+
 - (void) moveViewToOriginalPosition {
     [UIView beginAnimations: nil context: nil];
     [UIView setAnimationBeginsFromCurrentState: YES];
@@ -77,23 +84,51 @@
     [UIView commitAnimations];
 }
 
+- (void) checkForBeginDelegateNotification {
+    if (scaleBegan == NO && rotateBegan == NO && panBegan == NO) {
+        if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidStartManipulation:)]) {
+            [self.delegate bssPushPopPressViewDidStartManipulation: self];
+        }
+    }
+}
+
+- (void) checkForEndDelegateNotification {
+    if (scaleBegan == NO && rotateBegan == NO && panBegan == NO) {
+        if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidFinishManipulation:)]) {
+            [self.delegate bssPushPopPressViewDidFinishManipulation: self];
+        }
+    }
+}
+
 - (void) pinch: (UIPinchGestureRecognizer*) pinch {
     switch (pinch.state) {
         case UIGestureRecognizerStateBegan: { 
+            [self checkForBeginDelegateNotification];
             gestureRecognizersWereCancelled = NO;
+            scaleBegan = YES;
             break; }
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: {
             gestureRecognizersWereCancelled = YES;
+            scaleBegan = NO;
+            rotateBegan = NO;
+            panBegan = NO;
             [self moveViewToOriginalPosition];
+            [self checkForEndDelegateNotification];
         } break;
-        case UIGestureRecognizerStateFailed: { break; }
+        case UIGestureRecognizerStateFailed: { 
+            scaleBegan = NO;
+            [self checkForEndDelegateNotification];
+        } break; 
         case UIGestureRecognizerStateChanged: {
             scaleTransform = CGAffineTransformScale(CGAffineTransformIdentity, pinch.scale, pinch.scale);
             self.transform = CGAffineTransformConcat(CGAffineTransformConcat(scaleTransform, rotateTransform), panTransform);
             break;
         }
         case UIGestureRecognizerStateEnded: {
+            scaleBegan = NO;
+            rotateBegan = NO;
+            panBegan = NO;
             gestureRecognizersWereCancelled = YES;
             
             if (pinch.velocity >= 15.0) {
@@ -116,43 +151,70 @@
             } else {
                 [self moveViewToOriginalPosition];
             }
+            [self checkForEndDelegateNotification];
             break; 
         }
     }
 }
 
 - (void) rotate: (UIRotationGestureRecognizer*) rotate {
+    if (rotate.state == UIGestureRecognizerStateBegan) {
+        gestureRecognizersWereCancelled = NO;
+    }
+    
     if (gestureRecognizersWereCancelled) return;
     
     switch (rotate.state) {
-        case UIGestureRecognizerStateBegan: { break; }
+        case UIGestureRecognizerStateBegan: { 
+            [self checkForBeginDelegateNotification];
+            rotateBegan = YES;
+        } break;
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: { 
+            rotateBegan = NO;
             [self moveViewToOriginalPosition];
+            [self checkForEndDelegateNotification];
         } break;
-        case UIGestureRecognizerStateFailed: { break; }
+        case UIGestureRecognizerStateFailed: { 
+            rotateBegan = NO;
+            [self checkForEndDelegateNotification];
+        } break;
         case UIGestureRecognizerStateChanged: {
             rotateTransform = CGAffineTransformRotate(CGAffineTransformIdentity, rotate.rotation);
             self.transform = CGAffineTransformConcat(CGAffineTransformConcat(scaleTransform, rotateTransform), panTransform);
             break;
         }
         case UIGestureRecognizerStateEnded: {
+            rotateBegan = NO;
             rotateTransform = CGAffineTransformIdentity;
+            [self checkForEndDelegateNotification];
             break; 
         }
     }
 }
 
 - (void) pan: (UIPanGestureRecognizer*) pan {
+    if (pan.state == UIGestureRecognizerStateBegan) {
+        gestureRecognizersWereCancelled = NO;
+    }
+    
     if (gestureRecognizersWereCancelled) return;
     
     switch (pan.state) {
-        case UIGestureRecognizerStateBegan: { break; }
+        case UIGestureRecognizerStateBegan: { 
+            [self checkForBeginDelegateNotification];
+            panBegan = YES;
+        } break;
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: { 
+            panBegan = NO;
             [self moveViewToOriginalPosition];
+            [self checkForEndDelegateNotification];
         } break;
-        case UIGestureRecognizerStateFailed: { break; }
+        case UIGestureRecognizerStateFailed: { 
+            panBegan = NO;
+            [self checkForEndDelegateNotification];
+        } break;
         case UIGestureRecognizerStateChanged: {
             CGPoint translation = [pan translationInView: self.superview];
             panTransform = CGAffineTransformTranslate(CGAffineTransformIdentity, translation.x, translation.y);
@@ -160,8 +222,10 @@
             break;
         }
         case UIGestureRecognizerStateEnded: { 
+            panBegan = NO;
             panTransform = CGAffineTransformIdentity;
             self.transform = CGAffineTransformConcat(CGAffineTransformConcat(scaleTransform, rotateTransform), panTransform);
+            [self checkForEndDelegateNotification];
             break; 
         }
     }
