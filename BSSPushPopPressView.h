@@ -34,6 +34,12 @@
 @optional
 - (void) bssPushPopPressViewDidStartManipulation: (BSSPushPopPressView*) pushPopPressView;
 - (void) bssPushPopPressViewDidFinishManipulation: (BSSPushPopPressView*) pushPopPressView;
+
+- (void) bssPushPopPressViewWillAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView duration: (NSTimeInterval) duration;
+- (void) bssPushPopPressViewDidAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView;
+
+- (void) bssPushPopPressViewWillAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView duration: (NSTimeInterval) duration;
+- (void) bssPushPopPressViewDidAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView;
 @end
 
 @interface BSSPushPopPressView : UIView<UIGestureRecognizerDelegate> {

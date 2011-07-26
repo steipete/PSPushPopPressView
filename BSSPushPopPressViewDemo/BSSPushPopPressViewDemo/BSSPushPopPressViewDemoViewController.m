@@ -69,4 +69,21 @@
     [UIView commitAnimations];
 }
 
+- (void) bssPushPopPressViewWillAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView duration: (NSTimeInterval) duration {
+    NSLog(@"Will animate to original frame");
+}
+
+- (void) bssPushPopPressViewDidAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView {
+    NSLog(@"Did animate to original frame");
+}
+
+- (void) bssPushPopPressViewWillAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView duration: (NSTimeInterval) duration {
+    NSLog(@"Will animate to fullscreen");
+}
+
+- (void) bssPushPopPressViewDidAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView {
+    NSLog(@"Did animate to fullscreen");
+}
+
+
 @end
