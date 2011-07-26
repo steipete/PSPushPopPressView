@@ -7,7 +7,10 @@
 #import <UIKit/UIKit.h>
 #import "BSSPushPopPressView.h"
 
-@interface BSSPushPopPressViewDemoViewController : UIViewController<BSSPushPopPressViewDelegate>
+@interface BSSPushPopPressViewDemoViewController : UIViewController<BSSPushPopPressViewDelegate> {
+    BSSPushPopPressView* pushPopPressView;
+    UIButton* playPauseButton;
+}
 
 @property (nonatomic, retain) UIView* contentView;
 @end

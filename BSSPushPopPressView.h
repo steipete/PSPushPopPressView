@@ -40,6 +40,12 @@
 
 - (void) bssPushPopPressViewWillAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView duration: (NSTimeInterval) duration;
 - (void) bssPushPopPressViewDidAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView;
+
+- (BOOL) bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView;
+- (BOOL) bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView;
+
+- (void) bssPushPopPressViewDidReceiveTap: (BSSPushPopPressView*) pushPopPressView;
+
 @end
 
 @interface BSSPushPopPressView : UIView<UIGestureRecognizerDelegate> {
@@ -54,5 +60,11 @@
     NSMutableArray* currentTouches;
 }
 
-@property (nonatomic, assign) id<BSSPushPopPressViewDelegate> delegate;
+@property (nonatomic, assign) id<BSSPushPopPressViewDelegate> pushPopPressViewDelegate;
+
+@property (nonatomic, readonly) BOOL isFullscreen;
+
+- (void) animateToFullscreenWindowFrame;
+- (void) animateToOriginalFrame;
+
 @end

@@ -31,7 +31,7 @@
 
 @implementation BSSPushPopPressView
 
-@synthesize delegate;
+@synthesize pushPopPressViewDelegate;
 
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
@@ -71,9 +71,10 @@
         [panRecognizer release];
         
         UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tap:)];
+        tapRecognizer.delegate = self;
         tapRecognizer.cancelsTouchesInView = NO;
         tapRecognizer.delaysTouchesBegan = NO;
-        tapRecognizer.delaysTouchesEnded = NO;
+        tapRecognizer.delaysTouchesEnded = NO; 
         [self addGestureRecognizer: tapRecognizer];
         [tapRecognizer release];
         
@@ -84,7 +85,7 @@
 }
 
 - (void) dealloc {
-    delegate = nil;
+    pushPopPressViewDelegate = nil;
     [currentTouches release], currentTouches = nil;
     [super dealloc];
 }
@@ -97,8 +98,8 @@
     CGFloat widthDifference = (self.frame.size.width - initialFrame.size.width) * 0.05;
     CGFloat heightDifference = (self.frame.size.height - initialFrame.size.height) * 0.05;
 
-    if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
-        [self.delegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.75];
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.75];
     }
     [UIView animateWithDuration: 0.5 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
                      animations: ^{
@@ -113,8 +114,8 @@
                          [UIView animateWithDuration: 0.25 animations: ^{
                              self.frame = initialFrame;
                          } completion: ^(BOOL finished) {
-                             if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                                 [self.delegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
                              }
                          }];
                     }];
@@ -140,8 +141,8 @@
     if (pinch) {
         scaleActive = NO;
         if (pinch.velocity >= 15.0) {
-            if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.delegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
+                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
             }
             [UIView animateWithDuration: 0.35 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
                              animations: ^{
@@ -152,13 +153,13 @@
                                  self.frame = self.window.bounds;
                              }
                              completion: ^(BOOL finished) {
-                                 if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                     [self.delegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                                  }
                              }];
         } else if (self.frame.size.width > (self.window.bounds.size.width * 0.85)) {
-            if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.delegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
+                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
             }
             [UIView animateWithDuration: 0.35 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
                              animations: ^{
@@ -169,8 +170,8 @@
                                  self.frame = self.window.bounds;
                              }
                              completion: ^(BOOL finished) {
-                                 if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                     [self.delegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                                  }
                              }];
         } else {
@@ -263,40 +264,15 @@
 }
 
 - (void) tap: (UITapGestureRecognizer*) tap {
-    if (CGRectEqualToRect(self.frame, initialFrame)) {
-        if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-            [self.delegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.6];
+    if (tap.state == UIGestureRecognizerStateEnded) {
+        if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidReceiveTap:)]) {
+            [self.pushPopPressViewDelegate bssPushPopPressViewDidReceiveTap: self];
         }
-        [UIView animateWithDuration: 0.35 animations: ^{
-            self.frame = CGRectMake(self.window.bounds.origin.x - 10, self.window.bounds.origin.y - 10, self.window.bounds.size.width + 20, self.window.bounds.size.height + 20);
-        } completion: ^(BOOL finished) {
-            [UIView animateWithDuration: 0.25 
-                             animations: ^{
-                                 self.frame = self.window.bounds;
-                             }
-                             completion: ^(BOOL finished) {
-                                 if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                     [self.delegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
-                                 }
-                             }];
-        }];
-    } else {
-        if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
-            [self.delegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.55];
+        if (CGRectEqualToRect(self.frame, initialFrame)) {
+            [self animateToFullscreenWindowFrame];
+        } else {
+            [self animateToOriginalFrame];
         }
-        [UIView animateWithDuration: 0.35 animations: ^{
-            self.frame = CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6);
-        } completion: ^(BOOL finished) {
-            [UIView animateWithDuration: 0.35 
-                             animations: ^{
-                                 self.frame = initialFrame;
-                             }
-                             completion: ^(BOOL finished) {
-                                 if ([self.delegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                                     [self.delegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
-                                 }
-                             }];
-        }];
     }
 }
 
@@ -304,11 +280,18 @@
     return YES;
 }
 
+- (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer shouldReceiveTouch: (UITouch*) touch {
+    if ([gestureRecognizer isKindOfClass: [UITapGestureRecognizer class]] && [touch.view isKindOfClass: [UIButton class]]) {
+        return NO;
+    }
+    return YES;
+}
+
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     BOOL notYetStarted = [currentTouches count] < 2;
     [currentTouches addObjectsFromArray: [touches allObjects]];
     if (notYetStarted && [currentTouches count] >= 2) {
-        [self.delegate bssPushPopPressViewDidStartManipulation: self];
+        [self.pushPopPressViewDelegate bssPushPopPressViewDidStartManipulation: self];
     }
 }
 
@@ -316,7 +299,7 @@
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches removeObjectsInArray: [touches allObjects]];
     if (notYetEnded && [currentTouches count] < 2) {
-        [self.delegate bssPushPopPressViewDidFinishManipulation: self];
+        [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
 
@@ -324,8 +307,62 @@
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches removeObjectsInArray: [touches allObjects]];
     if (notYetEnded && [currentTouches count] < 2) {
-        [self.delegate bssPushPopPressViewDidFinishManipulation: self];
+        [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
+}
+
+- (BOOL) isFullscreen {
+    return CGRectEqualToRect(self.frame, self.window.bounds);
+}
+
+- (void) animateToFullscreenWindowFrame {
+    if (self.isFullscreen) return;
+
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame:)]) {
+        if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: self] == NO) return;
+    }
+
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.6];
+    }
+    [UIView animateWithDuration: 0.35 animations: ^{
+        self.frame = CGRectMake(self.window.bounds.origin.x - 10, self.window.bounds.origin.y - 10, self.window.bounds.size.width + 20, self.window.bounds.size.height + 20);
+    } completion: ^(BOOL finished) {
+        [UIView animateWithDuration: 0.25 
+                         animations: ^{
+                             self.frame = self.window.bounds;
+                         }
+                         completion: ^(BOOL finished) {
+                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+                             }
+                         }];
+    }];
+}
+
+- (void) animateToOriginalFrame {
+    if (self.isFullscreen == NO) return;
+    
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
+        if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
+    }
+    
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.55];
+    }
+    [UIView animateWithDuration: 0.35 animations: ^{
+        self.frame = CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6);
+    } completion: ^(BOOL finished) {
+        [UIView animateWithDuration: 0.35 
+                         animations: ^{
+                             self.frame = initialFrame;
+                         }
+                         completion: ^(BOOL finished) {
+                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+                             }
+                         }];
+    }];
 }
 
 @end
