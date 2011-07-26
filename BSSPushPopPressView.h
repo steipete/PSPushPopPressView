@@ -42,11 +42,10 @@
     CGAffineTransform panTransform;
     CGRect initialFrame;
     
-    BOOL scaleBegan;
-    BOOL rotateBegan;
-    BOOL panBegan;
+    BOOL gesturesEnded;
+    BOOL scaleActive;
     
-    BOOL gestureRecognizersWereCancelled;
+    NSMutableArray* currentTouches;
 }
 
 @property (nonatomic, assign) id<BSSPushPopPressViewDelegate> delegate;

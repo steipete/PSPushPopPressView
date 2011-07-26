@@ -11,6 +11,7 @@
 		5B92536613D858C600E5FD25 /* BSSPushPopPressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B92536513D858C600E5FD25 /* BSSPushPopPressView.m */; };
 		5B92536813D858CF00E5FD25 /* sampleimage.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5B92536713D858CF00E5FD25 /* sampleimage.jpg */; };
 		5B92536A13D862A400E5FD25 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B92536913D862A400E5FD25 /* QuartzCore.framework */; };
+		5BC6BD9B13DD8B5B00E85BAB /* backgroundImage2.png in Resources */ = {isa = PBXBuildFile; fileRef = 5BC6BD9A13DD8B5B00E85BAB /* backgroundImage2.png */; };
 		5BC7305813D858840079A0D8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305713D858840079A0D8 /* UIKit.framework */; };
 		5BC7305A13D858840079A0D8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305913D858840079A0D8 /* Foundation.framework */; };
 		5BC7305C13D858840079A0D8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BC7305B13D858840079A0D8 /* CoreGraphics.framework */; };
@@ -28,6 +29,7 @@
 		5B92536513D858C600E5FD25 /* BSSPushPopPressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BSSPushPopPressView.m; path = ../../BSSPushPopPressView.m; sourceTree = "<group>"; };
 		5B92536713D858CF00E5FD25 /* sampleimage.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sampleimage.jpg; sourceTree = "<group>"; };
 		5B92536913D862A400E5FD25 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		5BC6BD9A13DD8B5B00E85BAB /* backgroundImage2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = backgroundImage2.png; sourceTree = "<group>"; };
 		5BC7305313D858840079A0D8 /* BSSPushPopPressViewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BSSPushPopPressViewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BC7305713D858840079A0D8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		5BC7305913D858840079A0D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -108,6 +110,7 @@
 			children = (
 				5B92536713D858CF00E5FD25 /* sampleimage.jpg */,
 				5B5F830A13DB27CD00B7BD41 /* backgroundImage.png */,
+				5BC6BD9A13DD8B5B00E85BAB /* backgroundImage2.png */,
 				5BC7305F13D858840079A0D8 /* BSSPushPopPressViewDemo-Info.plist */,
 				5BC7306013D858840079A0D8 /* InfoPlist.strings */,
 				5BC7306313D858840079A0D8 /* main.m */,
@@ -142,6 +145,7 @@
 		5BC7304A13D858830079A0D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = "Blacksmith Software";
 			};
 			buildConfigurationList = 5BC7304D13D858830079A0D8 /* Build configuration list for PBXProject "BSSPushPopPressViewDemo" */;
@@ -171,6 +175,7 @@
 				5BC7307113D858840079A0D8 /* BSSPushPopPressViewDemoViewController.xib in Resources */,
 				5B92536813D858CF00E5FD25 /* sampleimage.jpg in Resources */,
 				5B5F830B13DB27CD00B7BD41 /* backgroundImage.png in Resources */,
+				5BC6BD9B13DD8B5B00E85BAB /* backgroundImage2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

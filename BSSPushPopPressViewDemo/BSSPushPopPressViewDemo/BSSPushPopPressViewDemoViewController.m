@@ -15,28 +15,34 @@
     [super viewDidLoad];
     
     contentView = [[UIView alloc] initWithFrame: CGRectZero];
-    UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"backgroundImage.png"]];
+    UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"backgroundImage2.png"]];
     backgroundImageView.frame = contentView.bounds;
-    backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
+    backgroundImageView.contentMode = UIViewContentModeScaleAspectFit;
     backgroundImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    backgroundImageView.tag = 661;
     [contentView addSubview: backgroundImageView];
     
     [self.view addSubview: contentView];
-    
-    BSSPushPopPressView* pushPopPressView = [[BSSPushPopPressView alloc] initWithFrame: CGRectMake(61, 383, 500, 376)];
-    pushPopPressView.delegate = self;
-    UIImageView* imageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"sampleimage.jpg"]];
-    imageView.frame = CGRectMake(0, 0, 500, 376);
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    [pushPopPressView addSubview: imageView];
-    [imageView release];
-    
-    [self.view addSubview: pushPopPressView];
 }
 
 - (void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear: animated];
+    
     contentView.frame = CGRectMake(-20, -15, self.view.window.bounds.size.width + 40, self.view.window.bounds.size.height + 30);
+    [contentView viewWithTag: 661].frame = CGRectMake(0, 0, self.view.window.bounds.size.width + 40, self.view.window.bounds.size.height + 30);
+    
+    BSSPushPopPressView* pushPopPressView = [[BSSPushPopPressView alloc] initWithFrame: CGRectMake(305, 230, 396, 514)];
+    pushPopPressView.backgroundColor = [UIColor redColor];
+    pushPopPressView.delegate = self;
+    UIImageView* imageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"sampleimage.jpg"]];
+    imageView.frame = CGRectMake(0, 0, 396, 514);
+    imageView.userInteractionEnabled = NO;
+    imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    pushPopPressView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    [pushPopPressView addSubview: imageView];
+    [imageView release];
+    
+    [self.view addSubview: pushPopPressView];
 }
 
 - (void) viewDidUnload {

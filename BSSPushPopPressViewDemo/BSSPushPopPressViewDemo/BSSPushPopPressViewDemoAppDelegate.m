@@ -13,7 +13,6 @@
 @synthesize viewController = _viewController;
 
 - (BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
-    self.window.frame = CGRectMake(0, 0, 1024, 768);
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     
