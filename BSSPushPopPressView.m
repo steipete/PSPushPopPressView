@@ -89,16 +89,28 @@
     [super dealloc];
 }
 
-- (void) moveViewToOriginalPosition {
-    [UIView beginAnimations: nil context: nil];
-    [UIView setAnimationBeginsFromCurrentState: YES];
-    [UIView setAnimationDuration: 0.35];
-    rotateTransform = CGAffineTransformIdentity;
-    panTransform = CGAffineTransformIdentity;
-    scaleTransform = CGAffineTransformIdentity;
-    self.transform = CGAffineTransformIdentity;
-    self.frame = initialFrame;
-    [UIView commitAnimations];
+- (void) moveViewToOriginalPosition {    
+    CGFloat bounceX = panTransform.tx * 0.01 * -1;
+    CGFloat bounceY = panTransform.ty * 0.01 * -1;
+    
+    
+    CGFloat widthDifference = (self.frame.size.width - initialFrame.size.width) * 0.05;
+    CGFloat heightDifference = (self.frame.size.height - initialFrame.size.height) * 0.05;
+
+    [UIView animateWithDuration: 0.5 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
+                     animations: ^{
+                         CGRect targetFrame = CGRectMake(initialFrame.origin.x + bounceX + (widthDifference / 2.0), initialFrame.origin.y + bounceY + (heightDifference / 2.0), initialFrame.size.width + (widthDifference * -1), initialFrame.size.height + (heightDifference * -1));
+                         rotateTransform = CGAffineTransformIdentity;
+                         panTransform = CGAffineTransformIdentity;
+                         scaleTransform = CGAffineTransformIdentity;
+                         self.transform = CGAffineTransformIdentity;
+                         self.frame = targetFrame;
+                     }
+                     completion: ^(BOOL finished) {
+                         [UIView animateWithDuration: 0.25 animations: ^{
+                             self.frame = initialFrame;
+                         }];
+                    }];
 }
 
 - (void) startedGesturesWithPinch: (UIPinchGestureRecognizer*) pinch pan: (UIPanGestureRecognizer*) pan rotate: (UIRotationGestureRecognizer*) rotate {
