@@ -70,6 +70,9 @@
 
 @property (nonatomic, readonly, getter=isBeingDragged) BOOL beingDragged;
 
+/// set initialFrame if you change frame after initWithFrame
+@property (nonatomic, assign) CGRect initialFrame;
+
 - (void) animateToFullscreenWindowFrame;
 - (void) animateToOriginalFrame;
 

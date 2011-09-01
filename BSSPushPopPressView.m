@@ -36,6 +36,7 @@
 
 @interface BSSPushPopPressView()
 @property (nonatomic, getter=isFullscreen) BOOL fullscreen;
+@property (nonatomic, retain) UIView *initialSuperview;
 @end
 
 @implementation BSSPushPopPressView
@@ -43,6 +44,8 @@
 @synthesize pushPopPressViewDelegate;
 @synthesize beingDragged;
 @synthesize fullscreen;
+@synthesize initialSuperview;
+@synthesize initialFrame;
 
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
@@ -108,16 +111,6 @@
     [super dealloc];
 }
 
-// if frame is set externally, save as new initialFrame
-- (void)setFrame:(CGRect)frame {
-    [super setFrame:frame];
-
-    // don't accept framechanges for internalFrame when in fullscreen
-    if (!self.isFullscreen) {
-        initialFrame = frame;
-    }
-}
-
 // don't manipulate initialFrame inside the view
 - (void)setFrameInternal:(CGRect)frame {
     [super setFrame:frame];
@@ -133,6 +126,41 @@
         windowBounds.size.height = tmp;
     }
     return windowBounds;
+}
+
+- (UIView *)rootView {
+    return self.window.rootViewController.view;
+}
+
+- (CGRect)superviewCorrectedInitialFrame {
+    UIView *rootView = [self rootView];
+    CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame fromView:self.initialSuperview];
+    return superviewCorrectedInitialFrame;
+}
+
+- (BOOL)detachViewToWindow:(BOOL)enable {
+    BOOL viewChanged = NO;
+    UIView *rootView = [self rootView];
+
+    if (enable && !self.initialSuperview) {
+        self.initialSuperview = self.superview;
+        CGRect newFrame = [self.superview convertRect:initialFrame toView:rootView];
+        [rootView addSubview:self];
+        [self setFrameInternal:newFrame];
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        viewChanged = YES;
+
+        NSLog(@"detached! Frame: %@", NSStringFromCGRect(newFrame));
+    }else if(!enable) {
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        if (self.initialSuperview) {
+            [self.initialSuperview addSubview:self];
+            viewChanged = YES;
+        }
+        [self setFrameInternal:initialFrame];
+        self.initialSuperview = nil;
+    }
+    return viewChanged;
 }
 
 - (void)updateShadowPath {
@@ -187,15 +215,17 @@
 - (void) moveViewToOriginalPositionAnimated:(BOOL)animated bounces:(BOOL)bounces {
     CGFloat bounceX = panTransform.tx * 0.01 * -1;
     CGFloat bounceY = panTransform.ty * 0.01 * -1;
-    
-    CGFloat widthDifference = (self.frame.size.width - initialFrame.size.width) * 0.05;
-    CGFloat heightDifference = (self.frame.size.height - initialFrame.size.height) * 0.05;
+
+    CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
+    CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
+    CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
 
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationMoveToOriginalPositionDuration*1.5f];
     }
 
     self.fullscreen = NO;
+
     [UIView animateWithDuration: animated ? kBSSAnimationMoveToOriginalPositionDuration : 0.f delay: 0.0
                         options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                      animations: ^{
@@ -207,14 +237,15 @@
 
                          if (bounces) {
                              if (abs(bounceX) > 0 || abs(bounceY) > 0) {
-                                 CGRect targetFrame = CGRectMake(initialFrame.origin.x + bounceX + (widthDifference / 2.0), initialFrame.origin.y + bounceY + (heightDifference / 2.0), initialFrame.size.width + (widthDifference * -1), initialFrame.size.height + (heightDifference * -1));
+                                 CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + bounceX + (widthDifference / 2.0), correctedInitialFrame.origin.y + bounceY + (heightDifference / 2.0), correctedInitialFrame.size.width + (widthDifference * -1), correctedInitialFrame.size.height + (heightDifference * -1));
                                  [self setFrameInternal:targetFrame];
                              }else {
+                                 // there's reason behind this madness. shadow freaks out when we come from fullscreen, but not if we had transforms.
                                  fullscreenAnimationActive = YES;
-                                 [self setFrameInternal:CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6)];
+                                 [self setFrameInternal:CGRectMake(correctedInitialFrame.origin.x + 3, correctedInitialFrame.origin.y + 3, correctedInitialFrame.size.width - 6, correctedInitialFrame.size.height - 6)];
                              }
                          }else {
-                             [self setFrameInternal:initialFrame];
+                             [self setFrameInternal:correctedInitialFrame];
                          }
                      }
                      completion: ^(BOOL finished) {
@@ -222,13 +253,19 @@
                          if (bounces && finished) {
                              [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
                                                  options:UIViewAnimationOptionAllowUserInteraction animations: ^{
-                                                     [self setFrameInternal:initialFrame];
+                                                     [self setFrameInternal:correctedInitialFrame];
                                                  } completion: ^(BOOL finished) {
+                                                     if (finished) {
+                                                         [self detachViewToWindow:NO];
+                                                     }
                                                      if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
                                                          [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
                                                      }
                                                  }];
                          }else {
+                             if (finished) {
+                                 [self detachViewToWindow:NO];
+                             }
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
                                  [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
                              }
@@ -242,10 +279,13 @@
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
     }
 
+    BOOL viewChanged = [self detachViewToWindow:YES];
     self.fullscreen = YES;
+
     CGRect windowBounds = [self windowBounds];
     [UIView animateWithDuration: animated ? kBSSAnimationDuration : 0.f delay: 0.0
-                        options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                        // view hierarchy change needs some time propagating, don't use UIViewAnimationOptionBeginFromCurrentState when just changed
+                        options: (viewChanged ? 0 : UIViewAnimationOptionBeginFromCurrentState) | UIViewAnimationOptionAllowUserInteraction
                      animations: ^{
                          scaleTransform = CGAffineTransformIdentity;
                          rotateTransform = CGAffineTransformIdentity;
@@ -275,6 +315,7 @@
 }
 
 - (void) startedGesture:(UIGestureRecognizer *)gesture {
+    [self detachViewToWindow:YES];
     UIPinchGestureRecognizer *pinch = [gesture isKindOfClass:[UIPinchGestureRecognizer class]] ? (UIPinchGestureRecognizer *)gesture : nil;
     gesturesEnded = NO;
     if (pinch) {
@@ -396,28 +437,28 @@
 }
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    self.beingDragged = YES;
     BOOL notYetStarted = [currentTouches count] < 2;
     [currentTouches unionSet:touches];
     if (notYetStarted && [currentTouches count] >= 2) {
-        self.beingDragged = YES;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidStartManipulation: self];
     }
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    self.beingDragged = NO;
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
-        self.beingDragged = NO;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    self.beingDragged = NO;
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
-        self.beingDragged = NO;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
