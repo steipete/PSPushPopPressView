@@ -50,7 +50,7 @@
         
         initialFrame = _frame;
         
-        UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget: self action: @selector(pinch:)];
+        UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
         pinchRecognizer.cancelsTouchesInView = NO;
         pinchRecognizer.delaysTouchesBegan = NO;
         pinchRecognizer.delaysTouchesEnded = NO;
@@ -58,7 +58,7 @@
         [self addGestureRecognizer: pinchRecognizer];
         [pinchRecognizer release];
         
-        UIRotationGestureRecognizer* rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget: self action: @selector(rotate:)];
+        UIRotationGestureRecognizer* rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
         rotationRecognizer.cancelsTouchesInView = NO;
         rotationRecognizer.delaysTouchesBegan = NO;
         rotationRecognizer.delaysTouchesEnded = NO;
@@ -66,7 +66,7 @@
         [self addGestureRecognizer: rotationRecognizer];
         [rotationRecognizer release];
         
-        UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget: self action: @selector(pan:)];
+        UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
         panRecognizer.cancelsTouchesInView = NO;
         panRecognizer.delaysTouchesBegan = NO;
         panRecognizer.delaysTouchesEnded = NO;
@@ -206,7 +206,8 @@
                      }];
 }
 
-- (void) startedGesturesWithPinch: (UIPinchGestureRecognizer*) pinch pan: (UIPanGestureRecognizer*) pan rotate: (UIRotationGestureRecognizer*) rotate {
+- (void) startedGesture:(UIGestureRecognizer *)gesture {
+    UIPinchGestureRecognizer *pinch = [gesture isKindOfClass:[UIPinchGestureRecognizer class]] ? (UIPinchGestureRecognizer *)gesture : nil;
     gesturesEnded = NO;
     if (pinch) {
         scaleActive = YES;
@@ -216,9 +217,10 @@
 /*
  When one gesture ends, the whole view manipulation is ended. In case the user also started a pinch and the pinch is still active, we wait for the pinch to finish as we want to check for a fast pinch movement to open the view in fullscreen or not. If no pinch is active, we can end the manipulation as soon as the first gesture ended.
  */
-- (void) endedGesturesWithPinch: (UIPinchGestureRecognizer*) pinch pan: (UIPanGestureRecognizer*) pan rotate: (UIRotationGestureRecognizer*) rotate {
+- (void) endedGesture:(UIGestureRecognizer *)gesture {
     if (gesturesEnded) return;
     
+    UIPinchGestureRecognizer *pinch = [gesture isKindOfClass:[UIPinchGestureRecognizer class]] ? (UIPinchGestureRecognizer *)gesture : nil;
     if (scaleActive == YES && pinch == nil) return;
     
     gesturesEnded = YES;        
@@ -267,14 +269,17 @@
     }
 }
 
-- (void) modifiedGesturesWithPinch: (UIPinchGestureRecognizer*) pinch pan: (UIPanGestureRecognizer*) pan rotate: (UIRotationGestureRecognizer*) rotate {
-    if (pinch) {
+- (void) modifiedGesture:(UIGestureRecognizer *)gesture {
+    if ([gesture isKindOfClass:[UIPinchGestureRecognizer class]]) {
+        UIPinchGestureRecognizer *pinch = (UIPinchGestureRecognizer *)gesture;
         scaleTransform = CGAffineTransformScale(CGAffineTransformIdentity, pinch.scale, pinch.scale);
     }
-    if (rotate) {
+    else if ([gesture isKindOfClass:[UIRotationGestureRecognizer class]]) {
+        UIRotationGestureRecognizer *rotate = (UIRotationGestureRecognizer *)gesture;
         rotateTransform = CGAffineTransformRotate(CGAffineTransformIdentity, rotate.rotation);
     }
-    if (pan) {
+    else if ([gesture isKindOfClass:[UIPanGestureRecognizer class]]) {
+        UIPanGestureRecognizer *pan = (UIPanGestureRecognizer *)gesture;
         CGPoint translation = [pan translationInView: self.superview];
         panTransform = CGAffineTransformTranslate(CGAffineTransformIdentity, translation.x, translation.y);
     }
@@ -282,67 +287,23 @@
     self.transform = CGAffineTransformConcat(CGAffineTransformConcat(scaleTransform, rotateTransform), panTransform);
 }
 
-- (void) pinch: (UIPinchGestureRecognizer*) pinch {
-    switch (pinch.state) {
+- (void) pinchPanRotate: (UIGestureRecognizer*) gesture {
+    switch (gesture.state) {
         case UIGestureRecognizerStateBegan: { 
-            [self startedGesturesWithPinch: pinch pan: nil rotate: nil];
+            [self startedGesture:gesture];
             break; }
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: {
-            [self endedGesturesWithPinch: pinch pan: nil rotate: nil];
+            [self endedGesture:gesture];
         } break;
         case UIGestureRecognizerStateFailed: { 
         } break; 
         case UIGestureRecognizerStateChanged: {
-            [self modifiedGesturesWithPinch: pinch pan: nil rotate: nil];
+            [self modifiedGesture:gesture];
             break;
         }
         case UIGestureRecognizerStateEnded: {
-            [self endedGesturesWithPinch: pinch pan: nil rotate: nil];
-            break; 
-        }
-    }
-}
-
-- (void) rotate: (UIRotationGestureRecognizer*) rotate {
-    switch (rotate.state) {
-        case UIGestureRecognizerStateBegan: { 
-            [self startedGesturesWithPinch: nil pan: nil rotate: rotate];
-        } break;
-        case UIGestureRecognizerStatePossible: { break; }
-        case UIGestureRecognizerStateCancelled: { 
-            [self endedGesturesWithPinch: nil pan: nil rotate: rotate];
-        } break;
-        case UIGestureRecognizerStateFailed: { 
-        } break;
-        case UIGestureRecognizerStateChanged: {
-            [self modifiedGesturesWithPinch: nil pan: nil rotate: rotate];
-            break;
-        }
-        case UIGestureRecognizerStateEnded: {
-            [self endedGesturesWithPinch: nil pan: nil rotate: rotate];
-            break; 
-        }
-    }
-}
-
-- (void) pan: (UIPanGestureRecognizer*) pan {
-    switch (pan.state) {
-        case UIGestureRecognizerStateBegan: {
-            [self startedGesturesWithPinch: nil pan: pan rotate: nil];
-        } break;
-        case UIGestureRecognizerStatePossible: { break; }
-        case UIGestureRecognizerStateCancelled: { 
-            [self endedGesturesWithPinch: nil pan: pan rotate: nil];
-        } break;
-        case UIGestureRecognizerStateFailed: { 
-        } break;
-        case UIGestureRecognizerStateChanged: {
-            [self modifiedGesturesWithPinch: nil pan: pan rotate: nil];
-            break;
-        }
-        case UIGestureRecognizerStateEnded: { 
-            [self endedGesturesWithPinch: nil pan: pan rotate: nil];
+            [self endedGesture:gesture];
             break; 
         }
     }
