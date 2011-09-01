@@ -116,20 +116,13 @@
     [super setFrame:frame];
 }
 
-- (CGRect)windowBounds {
-    CGRect windowBounds = self.window.bounds;
-
-    // window is at the very root and doesn't have rotation applied yet
-    if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
-        CGFloat tmp = windowBounds.size.width;
-        windowBounds.size.width = windowBounds.size.height;
-        windowBounds.size.height = tmp;
-    }
-    return windowBounds;
-}
-
 - (UIView *)rootView {
     return self.window.rootViewController.view;
+}
+
+- (CGRect)windowBounds {
+    CGRect windowBounds = [self rootView].bounds;
+    return windowBounds;
 }
 
 - (CGRect)superviewCorrectedInitialFrame {
@@ -147,12 +140,9 @@
         CGRect newFrame = [self.superview convertRect:initialFrame toView:rootView];
         [rootView addSubview:self];
         [self setFrameInternal:newFrame];
-        self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         viewChanged = YES;
-
-        NSLog(@"detached! Frame: %@", NSStringFromCGRect(newFrame));
+        //NSLog(@"detached! Frame: %@", NSStringFromCGRect(newFrame));
     }else if(!enable) {
-        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         if (self.initialSuperview) {
             [self.initialSuperview addSubview:self];
             viewChanged = YES;
