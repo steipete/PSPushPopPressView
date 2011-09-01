@@ -118,6 +118,18 @@
     [super setFrame:frame];
 }
 
+- (CGRect)windowBounds {
+    CGRect windowBounds = self.window.bounds;
+
+    // window is at the very root and doesn't have rotation applied yet
+    if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
+        CGFloat tmp = windowBounds.size.width;
+        windowBounds.size.width = windowBounds.size.height;
+        windowBounds.size.height = tmp;
+    }
+    return windowBounds;
+}
+
 - (void)updateShadowPath {
     self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
@@ -223,14 +235,14 @@
                                  rotateTransform = CGAffineTransformIdentity;
                                  panTransform = CGAffineTransformIdentity;
                                  self.transform = CGAffineTransformIdentity;
-                                 [self setFrameInternal:self.window.bounds];
+                                 [self setFrameInternal:[self windowBounds]];
                              }
                              completion: ^(BOOL finished) {
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                      [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                                  }
                              }];
-        } else if (self.frame.size.width > (self.window.bounds.size.width * 0.85)) {
+        } else if (self.frame.size.width > ([self windowBounds].size.width * 0.85)) {
             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
                 [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
             }
@@ -240,7 +252,7 @@
                                  rotateTransform = CGAffineTransformIdentity;
                                  panTransform = CGAffineTransformIdentity;
                                  self.transform = CGAffineTransformIdentity;
-                                 [self setFrameInternal:self.window.bounds];
+                                 [self setFrameInternal:[self windowBounds]];
                              }
                              completion: ^(BOOL finished) {
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
@@ -396,7 +408,7 @@
 }
 
 - (BOOL) isFullscreen {
-    return CGRectEqualToRect(self.frame, self.window.bounds);
+    return CGRectEqualToRect(self.frame, [self windowBounds]);
 }
 
 - (void) animateToFullscreenWindowFrame {
@@ -410,11 +422,12 @@
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration:kBSSAnimationDuration*2];
     }
 
+    CGRect windowBounds = [self windowBounds];
     [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-        [self setFrameInternal:CGRectMake(self.window.bounds.origin.x - 10, self.window.bounds.origin.y - 10, self.window.bounds.size.width + 20, self.window.bounds.size.height + 20)];
+        [self setFrameInternal:CGRectMake(windowBounds.origin.x - 10, windowBounds.origin.y - 10,windowBounds.size.width + 20, windowBounds.size.height + 20)];
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-            [self setFrameInternal:self.window.bounds];
+            [self setFrameInternal:windowBounds];
         } completion:^(BOOL finished) {
             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
