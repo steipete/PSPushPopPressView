@@ -24,14 +24,20 @@
 //  BSSPushPopPressView.m
 //
 //  Copyright 2011 Blacksmith Software. All rights reserved.
+//  Modified by Peter Steinberger, 2011.
 //
 
 #import "BSSPushPopPressView.h"
 #import <QuartzCore/QuartzCore.h>
 
+#define kBSSAnimationDuration 0.35f
+#define kBSSShadowFadeDuration 0.45f
+#define kBSSAnimationMoveToOriginalPositionDuration 0.5f
+
 @implementation BSSPushPopPressView
 
 @synthesize pushPopPressViewDelegate;
+@synthesize beingDragged;
 
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
@@ -78,7 +84,14 @@
         [self addGestureRecognizer: tapRecognizer];
         [tapRecognizer release];
         
-        currentTouches = [NSMutableArray new];
+        currentTouches = [NSMutableSet new];
+
+        self.layer.shadowRadius = 15.0f;
+        self.layer.shadowOffset = CGSizeMake(5.0f, 5.0f);
+        self.layer.shadowOpacity = 0.4f;
+        self.layer.shadowColor = [UIColor blackColor].CGColor;
+        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+        self.layer.shadowOpacity = 0.0f;
     }
     
     return self;
@@ -90,35 +103,95 @@
     [super dealloc];
 }
 
+// if frame is set externally, save as new initialFrame
+- (void)setFrame:(CGRect)frame {
+    [super setFrame:frame];
+
+    // don't accept framechanges for internalFrame when in fullscreen
+    if (!self.isFullscreen) {
+        initialFrame = frame;
+    }
+}
+
+// don't manipulate initialFrame inside the view
+- (void)setFrameInternal:(CGRect)frame {
+    [super setFrame:frame];
+}
+
+- (void)updateShadowPath {
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+}
+
+- (void)applyShadowAnimated:(BOOL)animated {
+    if(animated) {
+        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"shadowOpacity"];
+        anim.fromValue = [NSNumber numberWithFloat:0.0f];
+        anim.toValue = [NSNumber numberWithFloat:1.0f];
+        anim.duration = kBSSShadowFadeDuration;
+        [self.layer addAnimation:anim forKey:@"shadowOpacity"];
+    }
+
+    [self updateShadowPath];
+    self.layer.shadowOpacity = 1.0f;
+}
+
+- (void)removeShadowAnimated:(BOOL)animated {
+
+    // TODO: sometimes animates cracy, shadowOpacity animation losses shadowPath transform on certain conditions
+    // shadow should also use a "lightSource", maybe it's easier to make a completely custom shadow view.
+    if (animated) {
+        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"shadowOpacity"];
+        anim.fromValue = [NSNumber numberWithFloat:1.0f];
+        anim.toValue = [NSNumber numberWithFloat:0.0f];
+        anim.duration = kBSSShadowFadeDuration;
+        [self.layer addAnimation:anim forKey:@"shadowOpacity"];
+    }
+
+    self.layer.shadowOpacity = 0.0f;
+}
+
+- (void)setBeingDragged:(BOOL)newBeingDragged {
+    if (newBeingDragged != beingDragged) {
+        beingDragged = newBeingDragged;
+
+        if (beingDragged) {
+            [self applyShadowAnimated:YES];
+        }else {
+            [self removeShadowAnimated:YES];
+        }
+    }
+}
+
 - (void) moveViewToOriginalPosition {    
     CGFloat bounceX = panTransform.tx * 0.01 * -1;
     CGFloat bounceY = panTransform.ty * 0.01 * -1;
-    
     
     CGFloat widthDifference = (self.frame.size.width - initialFrame.size.width) * 0.05;
     CGFloat heightDifference = (self.frame.size.height - initialFrame.size.height) * 0.05;
 
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
-        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.75];
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationMoveToOriginalPositionDuration*1.5f];
     }
-    [UIView animateWithDuration: 0.5 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
+    [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration delay: 0.0
+                        options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                      animations: ^{
                          CGRect targetFrame = CGRectMake(initialFrame.origin.x + bounceX + (widthDifference / 2.0), initialFrame.origin.y + bounceY + (heightDifference / 2.0), initialFrame.size.width + (widthDifference * -1), initialFrame.size.height + (heightDifference * -1));
                          rotateTransform = CGAffineTransformIdentity;
                          panTransform = CGAffineTransformIdentity;
                          scaleTransform = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
-                         self.frame = targetFrame;
+                         [self setFrameInternal:targetFrame];
                      }
                      completion: ^(BOOL finished) {
-                         [UIView animateWithDuration: 0.25 animations: ^{
-                             self.frame = initialFrame;
-                         } completion: ^(BOOL finished) {
-                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
-                             }
-                         }];
-                    }];
+                         [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
+                                             options:UIViewAnimationOptionAllowUserInteraction animations: ^{
+                                                 [self setFrameInternal:initialFrame];
+                                             } completion: ^(BOOL finished) {
+                                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+                                                 }
+                                             }];
+                     }];
 }
 
 - (void) startedGesturesWithPinch: (UIPinchGestureRecognizer*) pinch pan: (UIPanGestureRecognizer*) pan rotate: (UIRotationGestureRecognizer*) rotate {
@@ -142,15 +215,15 @@
         scaleActive = NO;
         if (pinch.velocity >= 15.0) {
             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
+                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
             }
-            [UIView animateWithDuration: 0.35 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
+            [UIView animateWithDuration: kBSSAnimationDuration delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                              animations: ^{
                                  scaleTransform = CGAffineTransformIdentity;
                                  rotateTransform = CGAffineTransformIdentity;
                                  panTransform = CGAffineTransformIdentity;
                                  self.transform = CGAffineTransformIdentity;
-                                 self.frame = self.window.bounds;
+                                 [self setFrameInternal:self.window.bounds];
                              }
                              completion: ^(BOOL finished) {
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
@@ -159,15 +232,15 @@
                              }];
         } else if (self.frame.size.width > (self.window.bounds.size.width * 0.85)) {
             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.35];
+                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
             }
-            [UIView animateWithDuration: 0.35 delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState 
+            [UIView animateWithDuration: kBSSAnimationDuration delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                              animations: ^{
                                  scaleTransform = CGAffineTransformIdentity;
                                  rotateTransform = CGAffineTransformIdentity;
                                  panTransform = CGAffineTransformIdentity;
                                  self.transform = CGAffineTransformIdentity;
-                                 self.frame = self.window.bounds;
+                                 [self setFrameInternal:self.window.bounds];
                              }
                              completion: ^(BOOL finished) {
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
@@ -277,6 +350,14 @@
 }
 
 - (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer {
+    // if the gesture recognizers's view isn't one of our pieces, don't allow simultaneous recognition
+    if (gestureRecognizer.view != self)
+        return NO;
+
+    // if the gesture recognizers are on different views, don't allow simultaneous recognition
+    if (gestureRecognizer.view != otherGestureRecognizer.view)
+        return NO;
+
     return YES;
 }
 
@@ -289,24 +370,27 @@
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     BOOL notYetStarted = [currentTouches count] < 2;
-    [currentTouches addObjectsFromArray: [touches allObjects]];
+    [currentTouches unionSet:touches];
     if (notYetStarted && [currentTouches count] >= 2) {
+        self.beingDragged = YES;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidStartManipulation: self];
     }
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     BOOL notYetEnded = [currentTouches count] >= 2;
-    [currentTouches removeObjectsInArray: [touches allObjects]];
+    [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
+        self.beingDragged = NO;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     BOOL notYetEnded = [currentTouches count] >= 2;
-    [currentTouches removeObjectsInArray: [touches allObjects]];
+    [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
+        self.beingDragged = NO;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
@@ -323,20 +407,19 @@
     }
 
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: 0.6];
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration:kBSSAnimationDuration*2];
     }
-    [UIView animateWithDuration: 0.35 animations: ^{
-        self.frame = CGRectMake(self.window.bounds.origin.x - 10, self.window.bounds.origin.y - 10, self.window.bounds.size.width + 20, self.window.bounds.size.height + 20);
-    } completion: ^(BOOL finished) {
-        [UIView animateWithDuration: 0.25 
-                         animations: ^{
-                             self.frame = self.window.bounds;
-                         }
-                         completion: ^(BOOL finished) {
-                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
-                             }
-                         }];
+
+    [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+        [self setFrameInternal:CGRectMake(self.window.bounds.origin.x - 10, self.window.bounds.origin.y - 10, self.window.bounds.size.width + 20, self.window.bounds.size.height + 20)];
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+            [self setFrameInternal:self.window.bounds];
+        } completion:^(BOOL finished) {
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+            }
+        }];
     }];
 }
 
@@ -348,20 +431,19 @@
     }
     
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
-        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration: 0.55];
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationDuration*2];
     }
-    [UIView animateWithDuration: 0.35 animations: ^{
-        self.frame = CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6);
+
+    [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+        [self setFrameInternal:CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6)];
     } completion: ^(BOOL finished) {
-        [UIView animateWithDuration: 0.35 
-                         animations: ^{
-                             self.frame = initialFrame;
-                         }
-                         completion: ^(BOOL finished) {
-                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
-                             }
-                         }];
+        [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+            [self setFrameInternal:initialFrame];
+        } completion: ^(BOOL finished) {
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+            }
+        }];
     }];
 }
 

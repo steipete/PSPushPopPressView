@@ -24,6 +24,7 @@
 //  BSSPushPopPressView.h
 //
 //  Copyright 2011 Blacksmith Software. All rights reserved.
+//  Modified by Peter Steinberger, 2011.
 //
 
 #import <Foundation/Foundation.h>
@@ -54,15 +55,18 @@
     CGAffineTransform panTransform;
     CGRect initialFrame;
     
+    BOOL beingDragged;
     BOOL gesturesEnded;
     BOOL scaleActive;
     
-    NSMutableArray* currentTouches;
+    NSMutableSet* currentTouches;
 }
 
 @property (nonatomic, assign) id<BSSPushPopPressViewDelegate> pushPopPressViewDelegate;
 
 @property (nonatomic, readonly) BOOL isFullscreen;
+
+@property (nonatomic, readonly, getter=isBeingDragged) BOOL beingDragged;
 
 - (void) animateToFullscreenWindowFrame;
 - (void) animateToOriginalFrame;
