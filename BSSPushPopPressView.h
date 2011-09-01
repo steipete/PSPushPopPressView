@@ -55,6 +55,8 @@
     CGAffineTransform panTransform;
     CGRect initialFrame;
     
+    BOOL fullscreen;
+    BOOL fullscreenAnimationActive;
     BOOL beingDragged;
     BOOL gesturesEnded;
     BOOL scaleActive;

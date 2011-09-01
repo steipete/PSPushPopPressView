@@ -34,10 +34,15 @@
 #define kBSSShadowFadeDuration 0.45f
 #define kBSSAnimationMoveToOriginalPositionDuration 0.5f
 
+@interface BSSPushPopPressView()
+@property (nonatomic, getter=isFullscreen) BOOL fullscreen;
+@end
+
 @implementation BSSPushPopPressView
 
 @synthesize pushPopPressViewDelegate;
 @synthesize beingDragged;
+@synthesize fullscreen;
 
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
@@ -83,8 +88,8 @@
         tapRecognizer.delaysTouchesEnded = NO; 
         [self addGestureRecognizer: tapRecognizer];
         [tapRecognizer release];
-        
-        currentTouches = [NSMutableSet new];
+
+        currentTouches = [[NSMutableSet alloc] init];
 
         self.layer.shadowRadius = 15.0f;
         self.layer.shadowOffset = CGSizeMake(5.0f, 5.0f);
@@ -141,6 +146,8 @@
         anim.toValue = [NSNumber numberWithFloat:1.0f];
         anim.duration = kBSSShadowFadeDuration;
         [self.layer addAnimation:anim forKey:@"shadowOpacity"];
+    }else {
+        [self.layer removeAnimationForKey:@"shadowOpacity"];
     }
 
     [self updateShadowPath];
@@ -157,6 +164,8 @@
         anim.toValue = [NSNumber numberWithFloat:0.0f];
         anim.duration = kBSSShadowFadeDuration;
         [self.layer addAnimation:anim forKey:@"shadowOpacity"];
+    }else {
+        [self.layer removeAnimationForKey:@"shadowOpacity"];
     }
 
     self.layer.shadowOpacity = 0.0f;
@@ -169,12 +178,13 @@
         if (beingDragged) {
             [self applyShadowAnimated:YES];
         }else {
-            [self removeShadowAnimated:YES];
+            BOOL animate = !self.isFullscreen && !fullscreenAnimationActive;
+            [self removeShadowAnimated:animate];
         }
     }
 }
 
-- (void) moveViewToOriginalPosition {    
+- (void) moveViewToOriginalPositionAnimated:(BOOL)animated bounces:(BOOL)bounces {
     CGFloat bounceX = panTransform.tx * 0.01 * -1;
     CGFloat bounceY = panTransform.ty * 0.01 * -1;
     
@@ -184,25 +194,83 @@
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationMoveToOriginalPositionDuration*1.5f];
     }
-    [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration delay: 0.0
+
+    self.fullscreen = NO;
+    [UIView animateWithDuration: animated ? kBSSAnimationMoveToOriginalPositionDuration : 0.f delay: 0.0
                         options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                      animations: ^{
-                         CGRect targetFrame = CGRectMake(initialFrame.origin.x + bounceX + (widthDifference / 2.0), initialFrame.origin.y + bounceY + (heightDifference / 2.0), initialFrame.size.width + (widthDifference * -1), initialFrame.size.height + (heightDifference * -1));
+                         // always reset transforms
                          rotateTransform = CGAffineTransformIdentity;
                          panTransform = CGAffineTransformIdentity;
                          scaleTransform = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
-                         [self setFrameInternal:targetFrame];
+
+                         if (bounces) {
+                             if (abs(bounceX) > 0 || abs(bounceY) > 0) {
+                                 CGRect targetFrame = CGRectMake(initialFrame.origin.x + bounceX + (widthDifference / 2.0), initialFrame.origin.y + bounceY + (heightDifference / 2.0), initialFrame.size.width + (widthDifference * -1), initialFrame.size.height + (heightDifference * -1));
+                                 [self setFrameInternal:targetFrame];
+                             }else {
+                                 fullscreenAnimationActive = YES;
+                                 [self setFrameInternal:CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6)];
+                             }
+                         }else {
+                             [self setFrameInternal:initialFrame];
+                         }
                      }
                      completion: ^(BOOL finished) {
-                         [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
-                                             options:UIViewAnimationOptionAllowUserInteraction animations: ^{
-                                                 [self setFrameInternal:initialFrame];
-                                             } completion: ^(BOOL finished) {
-                                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
-                                                 }
-                                             }];
+                         fullscreenAnimationActive = NO;
+                         if (bounces && finished) {
+                             [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
+                                                 options:UIViewAnimationOptionAllowUserInteraction animations: ^{
+                                                     [self setFrameInternal:initialFrame];
+                                                 } completion: ^(BOOL finished) {
+                                                     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                                                         [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+                                                     }
+                                                 }];
+                         }else {
+                             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
+                                 [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
+                             }
+                         }
+                     }];
+}
+
+- (void)moveToFullscreenAnimated:(BOOL)animated bounces:(BOOL)bounces {
+
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
+        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
+    }
+
+    self.fullscreen = YES;
+    CGRect windowBounds = [self windowBounds];
+    [UIView animateWithDuration: animated ? kBSSAnimationDuration : 0.f delay: 0.0
+                        options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                     animations: ^{
+                         scaleTransform = CGAffineTransformIdentity;
+                         rotateTransform = CGAffineTransformIdentity;
+                         panTransform = CGAffineTransformIdentity;
+                         self.transform = CGAffineTransformIdentity;
+                         if (bounces) {
+                             [self setFrameInternal:CGRectMake(windowBounds.origin.x - 10, windowBounds.origin.y - 10,windowBounds.size.width + 20, windowBounds.size.height + 20)];
+                         }else {
+                             [self setFrameInternal:[self windowBounds]];
+                         }
+                     }
+                     completion: ^(BOOL finished) {
+                         if (bounces && finished) {
+                             [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+                                 [self setFrameInternal:windowBounds];
+                             } completion:^(BOOL finished) {
+                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+                                 }
+                             }];
+                         }else {
+                         if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
+                             [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
+                         }
+                         }
                      }];
 }
 
@@ -228,44 +296,14 @@
     if (pinch) {
         scaleActive = NO;
         if (pinch.velocity >= 15.0) {
-            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
-            }
-            [UIView animateWithDuration: kBSSAnimationDuration delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-                             animations: ^{
-                                 scaleTransform = CGAffineTransformIdentity;
-                                 rotateTransform = CGAffineTransformIdentity;
-                                 panTransform = CGAffineTransformIdentity;
-                                 self.transform = CGAffineTransformIdentity;
-                                 [self setFrameInternal:[self windowBounds]];
-                             }
-                             completion: ^(BOOL finished) {
-                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
-                                 }
-                             }];
+            [self moveToFullscreenAnimated:YES bounces:YES];
         } else if (self.frame.size.width > ([self windowBounds].size.width * 0.85)) {
-            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
-            }
-            [UIView animateWithDuration: kBSSAnimationDuration delay: 0.0 options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-                             animations: ^{
-                                 scaleTransform = CGAffineTransformIdentity;
-                                 rotateTransform = CGAffineTransformIdentity;
-                                 panTransform = CGAffineTransformIdentity;
-                                 self.transform = CGAffineTransformIdentity;
-                                 [self setFrameInternal:[self windowBounds]];
-                             }
-                             completion: ^(BOOL finished) {
-                                 if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                                     [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
-                                 }
-                             }];
+            [self moveToFullscreenAnimated:YES bounces:YES];
         } else {
-            [self moveViewToOriginalPosition];
+            [self moveViewToOriginalPositionAnimated:YES bounces:YES];
         }
     } else {
-        [self moveViewToOriginalPosition];
+        [self moveViewToOriginalPositionAnimated:YES bounces:YES];
     }
 }
 
@@ -329,7 +367,8 @@
         if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidReceiveTap:)]) {
             [self.pushPopPressViewDelegate bssPushPopPressViewDidReceiveTap: self];
         }
-        if (CGRectEqualToRect(self.frame, initialFrame)) {
+
+        if (!self.isFullscreen) {
             [self animateToFullscreenWindowFrame];
         } else {
             [self animateToOriginalFrame];
@@ -383,10 +422,6 @@
     }
 }
 
-- (BOOL) isFullscreen {
-    return CGRectEqualToRect(self.frame, [self windowBounds]);
-}
-
 - (void) animateToFullscreenWindowFrame {
     if (self.isFullscreen) return;
 
@@ -394,22 +429,7 @@
         if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: self] == NO) return;
     }
 
-    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
-        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration:kBSSAnimationDuration*2];
-    }
-
-    CGRect windowBounds = [self windowBounds];
-    [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-        [self setFrameInternal:CGRectMake(windowBounds.origin.x - 10, windowBounds.origin.y - 10,windowBounds.size.width + 20, windowBounds.size.height + 20)];
-    } completion:^(BOOL finished) {
-        [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-            [self setFrameInternal:windowBounds];
-        } completion:^(BOOL finished) {
-            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToFullscreenWindowFrame: self];
-            }
-        }];
-    }];
+    [self moveToFullscreenAnimated:YES bounces:YES];
 }
 
 - (void) animateToOriginalFrame {
@@ -418,22 +438,8 @@
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
         if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
     }
-    
-    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
-        [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationDuration*2];
-    }
 
-    [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-        [self setFrameInternal:CGRectMake(initialFrame.origin.x + 3, initialFrame.origin.y + 3, initialFrame.size.width - 6, initialFrame.size.height - 6)];
-    } completion: ^(BOOL finished) {
-        [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-            [self setFrameInternal:initialFrame];
-        } completion: ^(BOOL finished) {
-            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
-                [self.pushPopPressViewDelegate bssPushPopPressViewDidAnimateToOriginalFrame: self];
-            }
-        }];
-    }];
+    [self moveViewToOriginalPositionAnimated:YES bounces:YES];
 }
 
 @end
