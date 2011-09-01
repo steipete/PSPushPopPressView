@@ -287,7 +287,22 @@
     self.transform = CGAffineTransformConcat(CGAffineTransformConcat(scaleTransform, rotateTransform), panTransform);
 }
 
+// scale and rotation transforms are applied relative to the layer's anchor point
+// this method moves a gesture recognizer's view's anchor point between the user's fingers
+- (void)adjustAnchorPointForGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
+    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        UIView *piece = gestureRecognizer.view;
+        CGPoint locationInView = [gestureRecognizer locationInView:piece];
+        CGPoint locationInSuperview = [gestureRecognizer locationInView:piece.superview];
+
+        piece.layer.anchorPoint = CGPointMake(locationInView.x / piece.bounds.size.width, locationInView.y / piece.bounds.size.height);
+        piece.center = locationInSuperview;
+    }
+}
+
 - (void) pinchPanRotate: (UIGestureRecognizer*) gesture {
+    [self adjustAnchorPointForGestureRecognizer:gesture];
+
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: { 
             [self startedGesture:gesture];
