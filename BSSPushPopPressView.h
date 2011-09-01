@@ -45,16 +45,20 @@
 - (BOOL) bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame: (BSSPushPopPressView*) pushPopPressView;
 - (BOOL) bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: (BSSPushPopPressView*) pushPopPressView;
 
+/// only active if allowSingleTapSwitch is enabled (default)
 - (void) bssPushPopPressViewDidReceiveTap: (BSSPushPopPressView*) pushPopPressView;
 
 @end
 
 @interface BSSPushPopPressView : UIView<UIGestureRecognizerDelegate> {
+    UITapGestureRecognizer* tapRecognizer;
+
     CGAffineTransform scaleTransform;
     CGAffineTransform rotateTransform;
     CGAffineTransform panTransform;
     CGRect initialFrame;
     
+    BOOL allowSingleTapSwitch;
     BOOL fullscreen;
     BOOL fullscreenAnimationActive;
     BOOL beingDragged;
@@ -66,12 +70,17 @@
 
 @property (nonatomic, assign) id<BSSPushPopPressViewDelegate> pushPopPressViewDelegate;
 
+/// returns true if fullscreen is enabled
 @property (nonatomic, readonly) BOOL isFullscreen;
 
+/// true if one or more fingers are on the view
 @property (nonatomic, readonly, getter=isBeingDragged) BOOL beingDragged;
 
 /// set initialFrame if you change frame after initWithFrame
 @property (nonatomic, assign) CGRect initialFrame;
+
+/// allow mode switching via single tap. Defaults to YES.
+@property (nonatomic, assign) BOOL allowSingleTapSwitch;
 
 - (void) animateToFullscreenWindowFrame;
 - (void) animateToOriginalFrame;

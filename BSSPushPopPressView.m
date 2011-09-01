@@ -46,6 +46,7 @@
 @synthesize fullscreen;
 @synthesize initialSuperview;
 @synthesize initialFrame;
+@synthesize allowSingleTapSwitch;
 
 - (id) initWithFrame: (CGRect) _frame {
     if ((self = [super initWithFrame: _frame])) {
@@ -58,6 +59,8 @@
         
         initialFrame = _frame;
         
+        allowSingleTapSwitch = YES;
+
         UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
         pinchRecognizer.cancelsTouchesInView = NO;
         pinchRecognizer.delaysTouchesBegan = NO;
@@ -83,14 +86,13 @@
         panRecognizer.maximumNumberOfTouches = 2;
         [self addGestureRecognizer: panRecognizer];
         [panRecognizer release];
-        
-        UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tap:)];
+
+        tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tap:)];
         tapRecognizer.delegate = self;
         tapRecognizer.cancelsTouchesInView = NO;
         tapRecognizer.delaysTouchesBegan = NO;
-        tapRecognizer.delaysTouchesEnded = NO; 
+        tapRecognizer.delaysTouchesEnded = NO;
         [self addGestureRecognizer: tapRecognizer];
-        [tapRecognizer release];
 
         currentTouches = [[NSMutableSet alloc] init];
 
@@ -108,6 +110,7 @@
 - (void) dealloc {
     pushPopPressViewDelegate = nil;
     [currentTouches release], currentTouches = nil;
+    [tapRecognizer release];
     [super dealloc];
 }
 
@@ -206,6 +209,13 @@
     CGFloat bounceX = panTransform.tx * 0.01 * -1;
     CGFloat bounceY = panTransform.ty * 0.01 * -1;
 
+    // switch coordinates of gestureRecognizer in landscape
+    if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
+        CGFloat tmp = bounceY;
+        bounceY = bounceX;
+        bounceX = tmp;
+    }
+
     CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
     CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
     CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
@@ -232,20 +242,23 @@
                              }else {
                                  // there's reason behind this madness. shadow freaks out when we come from fullscreen, but not if we had transforms.
                                  fullscreenAnimationActive = YES;
-                                 [self setFrameInternal:CGRectMake(correctedInitialFrame.origin.x + 3, correctedInitialFrame.origin.y + 3, correctedInitialFrame.size.width - 6, correctedInitialFrame.size.height - 6)];
+                                 CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + 3, correctedInitialFrame.origin.y + 3, correctedInitialFrame.size.width - 6, correctedInitialFrame.size.height - 6);
+                                 NSLog(@"targetFrame: %@ (superview: %@; initialSuperview: %@)", NSStringFromCGRect(targetFrame), self.superview, self.initialSuperview);
+                                 [self setFrameInternal:targetFrame];
                              }
                          }else {
                              [self setFrameInternal:correctedInitialFrame];
                          }
                      }
                      completion: ^(BOOL finished) {
+                         NSLog(@"moveViewToOriginalPositionAnimated [complete] finished:%d, bounces:%d", finished, bounces);
                          fullscreenAnimationActive = NO;
                          if (bounces && finished) {
                              [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
                                                  options:UIViewAnimationOptionAllowUserInteraction animations: ^{
                                                      [self setFrameInternal:correctedInitialFrame];
                                                  } completion: ^(BOOL finished) {
-                                                     if (finished) {
+                                                     if (finished && !self.isBeingDragged) {
                                                          [self detachViewToWindow:NO];
                                                      }
                                                      if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
@@ -253,7 +266,7 @@
                                                      }
                                                  }];
                          }else {
-                             if (finished) {
+                             if (finished && !self.isBeingDragged) {
                                  [self detachViewToWindow:NO];
                              }
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
@@ -326,9 +339,9 @@
     
     if (pinch) {
         scaleActive = NO;
-        if (pinch.velocity >= 15.0) {
+        if (pinch.velocity >= 7.0f) {
             [self moveToFullscreenAnimated:YES bounces:YES];
-        } else if (self.frame.size.width > ([self windowBounds].size.width * 0.85)) {
+        } else if (self.frame.size.width > ([self windowBounds].size.width * 0.85f)) {
             [self moveToFullscreenAnimated:YES bounces:YES];
         } else {
             [self moveViewToOriginalPositionAnimated:YES bounces:YES];
@@ -394,15 +407,17 @@
 }
 
 - (void) tap: (UITapGestureRecognizer*) tap {
-    if (tap.state == UIGestureRecognizerStateEnded) {
-        if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidReceiveTap:)]) {
-            [self.pushPopPressViewDelegate bssPushPopPressViewDidReceiveTap: self];
-        }
+    if (self.allowSingleTapSwitch) {
+        if (tap.state == UIGestureRecognizerStateEnded) {
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidReceiveTap:)]) {
+                [self.pushPopPressViewDelegate bssPushPopPressViewDidReceiveTap: self];
+            }
 
-        if (!self.isFullscreen) {
-            [self animateToFullscreenWindowFrame];
-        } else {
-            [self animateToOriginalFrame];
+            if (!self.isFullscreen) {
+                [self animateToFullscreenWindowFrame];
+            } else {
+                [self animateToOriginalFrame];
+            }
         }
     }
 }
@@ -471,6 +486,14 @@
     }
 
     [self moveViewToOriginalPositionAnimated:YES bounces:YES];
+}
+
+// enable/disable single tap detection
+- (void)setAllowSingleTapSwitch:(BOOL)newAllowSingleTapSwitch {
+    if (allowSingleTapSwitch != newAllowSingleTapSwitch) {
+        allowSingleTapSwitch = newAllowSingleTapSwitch;
+        tapRecognizer.enabled = newAllowSingleTapSwitch;
+    }
 }
 
 @end
