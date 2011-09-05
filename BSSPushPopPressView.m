@@ -339,9 +339,9 @@
     
     if (pinch) {
         scaleActive = NO;
-        if (pinch.velocity >= 7.0f) {
+        if (pinch.velocity >= 2.0f) {
             [self moveToFullscreenAnimated:YES bounces:YES];
-        } else if (self.frame.size.width > ([self windowBounds].size.width * 0.85f)) {
+        } else if (self.frame.size.width > ([self windowBounds].size.width)) {
             [self moveToFullscreenAnimated:YES bounces:YES];
         } else {
             [self moveViewToOriginalPositionAnimated:YES bounces:YES];
@@ -442,10 +442,10 @@
 }
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    self.beingDragged = YES;
     BOOL notYetStarted = [currentTouches count] < 2;
     [currentTouches unionSet:touches];
     if (notYetStarted && [currentTouches count] >= 2) {
+        self.beingDragged = YES;
         [self.pushPopPressViewDelegate bssPushPopPressViewDidStartManipulation: self];
     }
 }
