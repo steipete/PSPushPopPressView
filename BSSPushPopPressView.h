@@ -71,7 +71,7 @@
 @property (nonatomic, assign) id<BSSPushPopPressViewDelegate> pushPopPressViewDelegate;
 
 /// returns true if fullscreen is enabled
-@property (nonatomic, readonly) BOOL isFullscreen;
+@property (nonatomic, readonly, getter=isFullscreen) BOOL fullscreen;
 
 /// true if one or more fingers are on the view
 @property (nonatomic, readonly, getter=isBeingDragged) BOOL beingDragged;

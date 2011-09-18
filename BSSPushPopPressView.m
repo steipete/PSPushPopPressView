@@ -33,6 +33,8 @@
 #define kBSSAnimationDuration 0.35f
 #define kBSSShadowFadeDuration 0.45f
 #define kBSSAnimationMoveToOriginalPositionDuration 0.5f
+#define kFullscreenAnimationBounce 20
+#define kEmbeddedAnimationBounceMultiplier 0.03f
 
 @interface BSSPushPopPressView()
 @property (nonatomic, getter=isFullscreen) BOOL fullscreen;
@@ -176,7 +178,6 @@
 }
 
 - (void)removeShadowAnimated:(BOOL)animated {
-
     // TODO: sometimes animates cracy, shadowOpacity animation losses shadowPath transform on certain conditions
     // shadow should also use a "lightSource", maybe it's easier to make a completely custom shadow view.
     if (animated) {
@@ -206,8 +207,8 @@
 }
 
 - (void) moveViewToOriginalPositionAnimated:(BOOL)animated bounces:(BOOL)bounces {
-    CGFloat bounceX = panTransform.tx * 0.01 * -1;
-    CGFloat bounceY = panTransform.ty * 0.01 * -1;
+    CGFloat bounceX = panTransform.tx * kEmbeddedAnimationBounceMultiplier * -1;
+    CGFloat bounceY = panTransform.ty * kEmbeddedAnimationBounceMultiplier * -1;
 
     // switch coordinates of gestureRecognizer in landscape
     if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
@@ -219,12 +220,11 @@
     CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
     CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
     CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
+    self.fullscreen = NO;
 
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToOriginalFrame: self duration:kBSSAnimationMoveToOriginalPositionDuration*1.5f];
     }
-
-    self.fullscreen = NO;
 
     [UIView animateWithDuration: animated ? kBSSAnimationMoveToOriginalPositionDuration : 0.f delay: 0.0
                         options: UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
@@ -243,7 +243,7 @@
                                  // there's reason behind this madness. shadow freaks out when we come from fullscreen, but not if we had transforms.
                                  fullscreenAnimationActive = YES;
                                  CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + 3, correctedInitialFrame.origin.y + 3, correctedInitialFrame.size.width - 6, correctedInitialFrame.size.height - 6);
-                                 NSLog(@"targetFrame: %@ (superview: %@; initialSuperview: %@)", NSStringFromCGRect(targetFrame), self.superview, self.initialSuperview);
+                                 //NSLog(@"targetFrame: %@ (superview: %@; initialSuperview: %@)", NSStringFromCGRect(targetFrame), self.superview, self.initialSuperview);
                                  [self setFrameInternal:targetFrame];
                              }
                          }else {
@@ -251,7 +251,7 @@
                          }
                      }
                      completion: ^(BOOL finished) {
-                         NSLog(@"moveViewToOriginalPositionAnimated [complete] finished:%d, bounces:%d", finished, bounces);
+                         //NSLog(@"moveViewToOriginalPositionAnimated [complete] finished:%d, bounces:%d", finished, bounces);
                          fullscreenAnimationActive = NO;
                          if (bounces && finished) {
                              [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
@@ -277,7 +277,6 @@
 }
 
 - (void)moveToFullscreenAnimated:(BOOL)animated bounces:(BOOL)bounces {
-
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
         [self.pushPopPressViewDelegate bssPushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kBSSAnimationDuration];
     }
@@ -295,7 +294,7 @@
                          panTransform = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
                          if (bounces) {
-                             [self setFrameInternal:CGRectMake(windowBounds.origin.x - 10, windowBounds.origin.y - 10,windowBounds.size.width + 20, windowBounds.size.height + 20)];
+                             [self setFrameInternal:CGRectMake(windowBounds.origin.x - kFullscreenAnimationBounce, windowBounds.origin.y - kFullscreenAnimationBounce, windowBounds.size.width + kFullscreenAnimationBounce*2, windowBounds.size.height + kFullscreenAnimationBounce*2)];
                          }else {
                              [self setFrameInternal:[self windowBounds]];
                          }
