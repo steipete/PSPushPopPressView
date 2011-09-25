@@ -125,6 +125,7 @@
 
 - (void) dealloc {
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     pushPopPressViewDelegate = nil;
     [currentTouches release], currentTouches = nil;
     [tapRecognizer release];
