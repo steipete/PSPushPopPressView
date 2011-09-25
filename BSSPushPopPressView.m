@@ -39,6 +39,7 @@
 @interface BSSPushPopPressView()
 @property (nonatomic, getter=isFullscreen) BOOL fullscreen;
 @property (nonatomic, retain) UIView *initialSuperview;
+- (CGRect)windowBounds;
 @end
 
 @implementation BSSPushPopPressView
@@ -50,6 +51,13 @@
 @synthesize initialFrame = initialFrame_;
 @synthesize allowSingleTapSwitch;
 @synthesize ignoreStatusBar;
+
+// adapt frame for fullscreen
+- (void)detectOrientation {
+    if (self.isFullscreen) {
+        self.frame = [self windowBounds];
+    }
+}
 
 - (id) initWithFrame: (CGRect) frame_ {
     if ((self = [super initWithFrame: frame_])) {
@@ -105,12 +113,18 @@
         self.layer.shadowColor = [UIColor blackColor].CGColor;
         self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
         self.layer.shadowOpacity = 0.0f;
+
+        // manually track rotations and adapt fullscreen
+        // needed if we rotate within a fullscreen animation and miss the autorotate event
+        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:UIDeviceOrientationDidChangeNotification object:nil];
     }
-    
+
     return self;
 }
 
 - (void) dealloc {
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     pushPopPressViewDelegate = nil;
     [currentTouches release], currentTouches = nil;
     [tapRecognizer release];
@@ -289,7 +303,7 @@
                                                      }
                                                  }];
                          }else {
-                             if (finished && !self.isBeingDragged) {
+                             if (!self.isBeingDragged) {
                                  [self detachViewToWindow:NO];
                              }
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewDidAnimateToOriginalFrame:)]) {
