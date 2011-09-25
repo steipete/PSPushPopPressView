@@ -34,7 +34,7 @@
 #define kBSSShadowFadeDuration 0.45f
 #define kBSSAnimationMoveToOriginalPositionDuration 0.5f
 #define kFullscreenAnimationBounce 20
-#define kEmbeddedAnimationBounceMultiplier 0.03f
+#define kEmbeddedAnimationBounceMultiplier 0.05f
 
 @interface BSSPushPopPressView()
 @property (nonatomic, getter=isFullscreen) BOOL fullscreen;
@@ -47,20 +47,21 @@
 @synthesize beingDragged;
 @synthesize fullscreen;
 @synthesize initialSuperview;
-@synthesize initialFrame;
+@synthesize initialFrame = initialFrame_;
 @synthesize allowSingleTapSwitch;
+@synthesize ignoreStatusBar;
 
-- (id) initWithFrame: (CGRect) _frame {
-    if ((self = [super initWithFrame: _frame])) {
+- (id) initWithFrame: (CGRect) frame_ {
+    if ((self = [super initWithFrame: frame_])) {
         self.userInteractionEnabled = YES;
         self.multipleTouchEnabled = YES;
         
         scaleTransform = CGAffineTransformIdentity;
         rotateTransform = CGAffineTransformIdentity;
         panTransform = CGAffineTransformIdentity;
-        
-        initialFrame = _frame;
-        
+
+        initialFrame_ = frame_;
+
         allowSingleTapSwitch = YES;
 
         UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
@@ -121,18 +122,39 @@
     [super setFrame:frame];
 }
 
+- (void)setInitialFrame:(CGRect)initialFrame {
+    initialFrame_ = initialFrame;
+
+    // if we're not in fullscreen, re-set frame
+    if (!self.isFullscreen) {
+        self.frame = initialFrame;
+    }
+}
+
 - (UIView *)rootView {
     return self.window.rootViewController.view;
 }
 
 - (CGRect)windowBounds {
+    // completely fullscreen
     CGRect windowBounds = [self rootView].bounds;
+
+    if (self.ignoreStatusBar) {
+        windowBounds = [UIScreen mainScreen].bounds;
+        if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
+            windowBounds.size.width = windowBounds.size.height;
+            windowBounds.size.height = [UIScreen mainScreen].bounds.size.width;
+        }
+        // TODO: frame still offset after rotate!
+        //CGFloat statusBarOffset = [self rootView].bounds.size.height - windowBounds.size.height;
+        //windowBounds.origin.y = statusBarOffset;
+    }
     return windowBounds;
 }
 
 - (CGRect)superviewCorrectedInitialFrame {
     UIView *rootView = [self rootView];
-    CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame fromView:self.initialSuperview];
+    CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame_ fromView:self.initialSuperview];
     return superviewCorrectedInitialFrame;
 }
 
@@ -142,7 +164,7 @@
 
     if (enable && !self.initialSuperview) {
         self.initialSuperview = self.superview;
-        CGRect newFrame = [self.superview convertRect:initialFrame toView:rootView];
+        CGRect newFrame = [self.superview convertRect:initialFrame_ toView:rootView];
         [rootView addSubview:self];
         [self setFrameInternal:newFrame];
         viewChanged = YES;
@@ -152,7 +174,7 @@
             [self.initialSuperview addSubview:self];
             viewChanged = YES;
         }
-        [self setFrameInternal:initialFrame];
+        [self setFrameInternal:initialFrame_];
         self.initialSuperview = nil;
     }
     return viewChanged;
@@ -217,7 +239,7 @@
         bounceX = tmp;
     }
 
-    CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
+    __block CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
     CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
     CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
     self.fullscreen = NO;
@@ -253,6 +275,7 @@
                      completion: ^(BOOL finished) {
                          //NSLog(@"moveViewToOriginalPositionAnimated [complete] finished:%d, bounces:%d", finished, bounces);
                          fullscreenAnimationActive = NO;
+                         correctedInitialFrame = [self superviewCorrectedInitialFrame];
                          if (bounces && finished) {
                              [UIView animateWithDuration: kBSSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
                                                  options:UIViewAnimationOptionAllowUserInteraction animations: ^{
@@ -284,7 +307,7 @@
     BOOL viewChanged = [self detachViewToWindow:YES];
     self.fullscreen = YES;
 
-    CGRect windowBounds = [self windowBounds];
+    __block CGRect windowBounds = [self windowBounds];
     [UIView animateWithDuration: animated ? kBSSAnimationDuration : 0.f delay: 0.0
                         // view hierarchy change needs some time propagating, don't use UIViewAnimationOptionBeginFromCurrentState when just changed
                         options: (viewChanged ? 0 : UIViewAnimationOptionBeginFromCurrentState) | UIViewAnimationOptionAllowUserInteraction
@@ -300,6 +323,7 @@
                          }
                      }
                      completion: ^(BOOL finished) {
+                         windowBounds = [self windowBounds];
                          if (bounces && finished) {
                              [UIView animateWithDuration:kBSSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
                                  [self setFrameInternal:windowBounds];
@@ -413,9 +437,9 @@
             }
 
             if (!self.isFullscreen) {
-                [self animateToFullscreenWindowFrame];
+                [self moveToFullscreenWindowAnimated:YES];
             } else {
-                [self animateToOriginalFrame];
+                [self moveToOriginalFrameAnimated:YES];
             }
         }
     }
@@ -441,6 +465,10 @@
 }
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    // sometimes, the system gets confused and doesn't send us touchesEnded/touchesCancelled-Events. Compensate and filter cancelled touches.
+    NSSet *cancelledTouches = [currentTouches filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"phase = %d", UITouchPhaseCancelled]];
+    [currentTouches minusSet:cancelledTouches];
+
     BOOL notYetStarted = [currentTouches count] < 2;
     [currentTouches unionSet:touches];
     if (notYetStarted && [currentTouches count] >= 2) {
@@ -467,24 +495,24 @@
     }
 }
 
-- (void) animateToFullscreenWindowFrame {
+- (void)moveToFullscreenWindowAnimated:(BOOL)animated {
     if (self.isFullscreen) return;
 
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame:)]) {
         if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: self] == NO) return;
     }
 
-    [self moveToFullscreenAnimated:YES bounces:YES];
+    [self moveToFullscreenAnimated:animated bounces:YES];
 }
 
-- (void) animateToOriginalFrame {
+- (void)moveToOriginalFrameAnimated:(BOOL)animated {
     if (self.isFullscreen == NO) return;
-    
+
     if ([self.pushPopPressViewDelegate respondsToSelector: @selector(bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
         if ([self.pushPopPressViewDelegate bssPushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
     }
 
-    [self moveViewToOriginalPositionAnimated:YES bounces:YES];
+    [self moveViewToOriginalPositionAnimated:animated bounces:YES];
 }
 
 // enable/disable single tap detection

@@ -56,7 +56,7 @@
     CGAffineTransform scaleTransform;
     CGAffineTransform rotateTransform;
     CGAffineTransform panTransform;
-    CGRect initialFrame;
+    CGRect initialFrame_;
     
     BOOL allowSingleTapSwitch;
     BOOL fullscreen;
@@ -64,6 +64,7 @@
     BOOL beingDragged;
     BOOL gesturesEnded;
     BOOL scaleActive;
+    BOOL ignoreStatusBar;
     
     NSMutableSet* currentTouches;
 }
@@ -82,7 +83,9 @@
 /// allow mode switching via single tap. Defaults to YES.
 @property (nonatomic, assign) BOOL allowSingleTapSwitch;
 
-- (void) animateToFullscreenWindowFrame;
-- (void) animateToOriginalFrame;
+@property (nonatomic, assign) BOOL ignoreStatusBar;
+
+- (void)moveToFullscreenWindowAnimated:(BOOL)animated;
+- (void)moveToOriginalFrameAnimated:(BOOL)animated;
 
 @end
