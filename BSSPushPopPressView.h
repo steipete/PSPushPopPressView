@@ -86,7 +86,14 @@
 
 @property (nonatomic, assign) BOOL ignoreStatusBar;
 
+
+/// animate/move to fullscreen
 - (void)moveToFullscreenWindowAnimated:(BOOL)animated;
+
+/// animate/moves to initialFrame size
 - (void)moveToOriginalFrameAnimated:(BOOL)animated;
+
+/// align view based on current size (either initialPosition or fullscreen)
+- (void)alignViewAnimated:(BOOL)animated bounces:(BOOL)bounces;
 
 @end

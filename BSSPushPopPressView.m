@@ -369,10 +369,23 @@
                      }];
 }
 
+- (void)alignViewAnimated:(BOOL)animated bounces:(BOOL)bounces {
+    if (self.frame.size.width > ([self windowBounds].size.width)) {
+        [self moveToFullscreenAnimated:animated bounces:bounces];
+    } else {
+        [self moveViewToOriginalPositionAnimated:animated bounces:bounces];
+    }
+}
+
 // disrupt gesture recognizer, which continues to receive touch events even as we set minimumNumberOfTouches to two.
 - (void)resetGestureRecognizers {
     panRecognizer_.enabled = NO;
     panRecognizer_.enabled = YES;
+
+    // if gestures haven't yet ended, but we're disrupted, align view anyway
+    if (!gesturesEnded) {
+        [self alignViewAnimated:YES bounces:YES];
+    }
 }
 
 - (void) startedGesture:(UIGestureRecognizer *)gesture {
@@ -387,25 +400,22 @@
 /*
  When one gesture ends, the whole view manipulation is ended. In case the user also started a pinch and the pinch is still active, we wait for the pinch to finish as we want to check for a fast pinch movement to open the view in fullscreen or not. If no pinch is active, we can end the manipulation as soon as the first gesture ended.
  */
-- (void) endedGesture:(UIGestureRecognizer *)gesture {
+- (void)endedGesture:(UIGestureRecognizer *)gesture {
     if (gesturesEnded) return;
     
     UIPinchGestureRecognizer *pinch = [gesture isKindOfClass:[UIPinchGestureRecognizer class]] ? (UIPinchGestureRecognizer *)gesture : nil;
     if (scaleActive == YES && pinch == nil) return;
     
     gesturesEnded = YES;        
-    
     if (pinch) {
         scaleActive = NO;
         if (pinch.velocity >= 2.0f) {
             [self moveToFullscreenAnimated:YES bounces:YES];
-        } else if (self.frame.size.width > ([self windowBounds].size.width)) {
-            [self moveToFullscreenAnimated:YES bounces:YES];
         } else {
-            [self moveViewToOriginalPositionAnimated:YES bounces:YES];
+            [self alignViewAnimated:YES bounces:YES];
         }
     } else {
-        [self moveViewToOriginalPositionAnimated:YES bounces:YES];
+        [self alignViewAnimated:YES bounces:YES];
     }
 }
 
