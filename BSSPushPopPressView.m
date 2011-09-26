@@ -37,6 +37,7 @@
 #define kEmbeddedAnimationBounceMultiplier 0.05f
 
 @interface BSSPushPopPressView()
+@property (nonatomic, getter=isBeingDragged) BOOL beingDragged;
 @property (nonatomic, getter=isFullscreen) BOOL fullscreen;
 @property (nonatomic, retain) UIView *initialSuperview;
 - (CGRect)windowBounds;
@@ -171,6 +172,19 @@
     UIView *rootView = [self rootView];
     CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame_ fromView:self.initialSuperview];
     return superviewCorrectedInitialFrame;
+}
+
+- (void)willMoveToSuperview:(UIView *)newSuperview {
+    if (!newSuperview && self.isBeingDragged) {
+        self.beingDragged = NO;
+
+        // do we need to call the delegate?
+        BOOL notYetEnded = [currentTouches count] >= 2;
+        if (notYetEnded) {
+            [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation:self];
+        }
+        [currentTouches removeAllObjects];
+    }
 }
 
 - (BOOL)detachViewToWindow:(BOOL)enable {
