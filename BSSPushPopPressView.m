@@ -381,11 +381,6 @@
 - (void)resetGestureRecognizers {
     panRecognizer_.enabled = NO;
     panRecognizer_.enabled = YES;
-
-    // if gestures haven't yet ended, but we're disrupted, align view anyway
-    if (!gesturesEnded) {
-        [self alignViewAnimated:YES bounces:YES];
-    }
 }
 
 - (void) startedGesture:(UIGestureRecognizer *)gesture {
