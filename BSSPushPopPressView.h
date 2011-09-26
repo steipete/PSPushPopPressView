@@ -52,6 +52,7 @@
 
 @interface BSSPushPopPressView : UIView<UIGestureRecognizerDelegate> {
     UITapGestureRecognizer* tapRecognizer;
+    UIPanGestureRecognizer* panRecognizer_;
 
     CGAffineTransform scaleTransform;
     CGAffineTransform rotateTransform;

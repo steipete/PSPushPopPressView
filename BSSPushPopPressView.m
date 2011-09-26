@@ -88,16 +88,16 @@
         rotationRecognizer.delegate = self;
         [self addGestureRecognizer: rotationRecognizer];
         [rotationRecognizer release];
-        
-        UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
-        panRecognizer.cancelsTouchesInView = NO;
-        panRecognizer.delaysTouchesBegan = NO;
-        panRecognizer.delaysTouchesEnded = NO;
-        panRecognizer.delegate = self;
-        panRecognizer.minimumNumberOfTouches = 2;
-        panRecognizer.maximumNumberOfTouches = 2;
-        [self addGestureRecognizer: panRecognizer];
-        [panRecognizer release];
+
+        panRecognizer_ = [[UIPanGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
+        panRecognizer_.cancelsTouchesInView = NO;
+        panRecognizer_.delaysTouchesBegan = NO;
+        panRecognizer_.delaysTouchesEnded = NO;
+        panRecognizer_.delegate = self;
+        panRecognizer_.minimumNumberOfTouches = 2;
+        panRecognizer_.maximumNumberOfTouches = 2;
+        [self addGestureRecognizer:panRecognizer_];
+        [panRecognizer_ release];
 
         tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tap:)];
         tapRecognizer.delegate = self;
@@ -369,6 +369,12 @@
                      }];
 }
 
+// disrupt gesture recognizer, which continues to receive touch events even as we set minimumNumberOfTouches to two.
+- (void)resetGestureRecognizers {
+    panRecognizer_.enabled = NO;
+    panRecognizer_.enabled = YES;
+}
+
 - (void) startedGesture:(UIGestureRecognizer *)gesture {
     [self detachViewToWindow:YES];
     UIPinchGestureRecognizer *pinch = [gesture isKindOfClass:[UIPinchGestureRecognizer class]] ? (UIPinchGestureRecognizer *)gesture : nil;
@@ -511,6 +517,7 @@
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
+        [self resetGestureRecognizers];
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
@@ -520,6 +527,7 @@
     BOOL notYetEnded = [currentTouches count] >= 2;
     [currentTouches minusSet:touches];
     if (notYetEnded && [currentTouches count] < 2) {
+        [self resetGestureRecognizers];
         [self.pushPopPressViewDelegate bssPushPopPressViewDidFinishManipulation: self];
     }
 }
