@@ -1,0 +1,240 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		78A918421478122900EFFC4D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A918411478122900EFFC4D /* Foundation.framework */; };
+		78A918541478123F00EFFC4D /* PSPushPopPressView.h in Headers */ = {isa = PBXBuildFile; fileRef = 78A918521478123F00EFFC4D /* PSPushPopPressView.h */; };
+		78A918551478123F00EFFC4D /* PSPushPopPressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 78A918531478123F00EFFC4D /* PSPushPopPressView.m */; };
+		78A918571478124D00EFFC4D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A918561478124D00EFFC4D /* QuartzCore.framework */; };
+		78A918591478125100EFFC4D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A918581478125100EFFC4D /* UIKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		78A9183E1478122900EFFC4D /* libPSPushPopPressView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPSPushPopPressView.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		78A918411478122900EFFC4D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		78A918521478123F00EFFC4D /* PSPushPopPressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PSPushPopPressView.h; sourceTree = SOURCE_ROOT; };
+		78A918531478123F00EFFC4D /* PSPushPopPressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PSPushPopPressView.m; sourceTree = SOURCE_ROOT; };
+		78A918561478124D00EFFC4D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		78A918581478125100EFFC4D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		78A9183B1478122900EFFC4D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78A918591478125100EFFC4D /* UIKit.framework in Frameworks */,
+				78A918571478124D00EFFC4D /* QuartzCore.framework in Frameworks */,
+				78A918421478122900EFFC4D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		78A918331478122900EFFC4D = {
+			isa = PBXGroup;
+			children = (
+				78A918431478122900EFFC4D /* PSPushPopPressView */,
+				78A918401478122900EFFC4D /* Frameworks */,
+				78A9183F1478122900EFFC4D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		78A9183F1478122900EFFC4D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				78A9183E1478122900EFFC4D /* libPSPushPopPressView.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		78A918401478122900EFFC4D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				78A918581478125100EFFC4D /* UIKit.framework */,
+				78A918561478124D00EFFC4D /* QuartzCore.framework */,
+				78A918411478122900EFFC4D /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		78A918431478122900EFFC4D /* PSPushPopPressView */ = {
+			isa = PBXGroup;
+			children = (
+				78A918521478123F00EFFC4D /* PSPushPopPressView.h */,
+				78A918531478123F00EFFC4D /* PSPushPopPressView.m */,
+			);
+			path = PSPushPopPressView;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		78A9183C1478122900EFFC4D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78A918541478123F00EFFC4D /* PSPushPopPressView.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		78A9183D1478122900EFFC4D /* PSPushPopPressView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 78A9184B1478122900EFFC4D /* Build configuration list for PBXNativeTarget "PSPushPopPressView" */;
+			buildPhases = (
+				78A9183A1478122900EFFC4D /* Sources */,
+				78A9183B1478122900EFFC4D /* Frameworks */,
+				78A9183C1478122900EFFC4D /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PSPushPopPressView;
+			productName = PSPushPopPressView;
+			productReference = 78A9183E1478122900EFFC4D /* libPSPushPopPressView.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		78A918351478122900EFFC4D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 78A918381478122900EFFC4D /* Build configuration list for PBXProject "PSPushPopPressView" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 78A918331478122900EFFC4D;
+			productRefGroup = 78A9183F1478122900EFFC4D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				78A9183D1478122900EFFC4D /* PSPushPopPressView */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		78A9183A1478122900EFFC4D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78A918551478123F00EFFC4D /* PSPushPopPressView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		78A918491478122900EFFC4D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					i386,
+					armv7,
+					armv6,
+				);
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		78A9184A1478122900EFFC4D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					i386,
+					armv7,
+					armv6,
+				);
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		78A9184C1478122900EFFC4D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/PSPushPopPressView.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		78A9184D1478122900EFFC4D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/PSPushPopPressView.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		78A918381478122900EFFC4D /* Build configuration list for PBXProject "PSPushPopPressView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78A918491478122900EFFC4D /* Debug */,
+				78A9184A1478122900EFFC4D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		78A9184B1478122900EFFC4D /* Build configuration list for PBXNativeTarget "PSPushPopPressView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78A9184C1478122900EFFC4D /* Debug */,
+				78A9184D1478122900EFFC4D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 78A918351478122900EFFC4D /* Project object */;
+}
