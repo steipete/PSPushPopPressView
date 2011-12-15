@@ -48,6 +48,7 @@
     BOOL allowSingleTapSwitch_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
+    BOOL fullscreenAnimationActive_;
     BOOL anchorPointUpdated;
 }
 

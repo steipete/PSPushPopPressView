@@ -17,7 +17,6 @@
 @interface PSPushPopPressView() {
     // internal state variables
     UIView *initialSuperview_;
-    BOOL fullscreenAnimationActive_;
     BOOL beingDragged_;
     BOOL gesturesEnded_;
     BOOL scaleActive_;
@@ -346,7 +345,6 @@
 
 // disrupt gesture recognizer, which continues to receive touch events even as we set minimumNumberOfTouches to two.
 - (void)resetGestureRecognizers {
-    
     for(UIGestureRecognizer *aGestRec in [self gestureRecognizers]){
         [aGestRec setEnabled:NO];
         [aGestRec setEnabled:YES];
@@ -406,9 +404,7 @@
 // scale and rotation transforms are applied relative to the layer's anchor point
 // this method moves a gesture recognizer's view's anchor point between the user's fingers
 - (void)adjustAnchorPointForGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
-    
-    if (!anchorPointUpdated)
-    {
+    if (!anchorPointUpdated) {
         UIView *piece = gestureRecognizer.view;
         CGPoint locationInView = [gestureRecognizer locationInView:piece];
         CGPoint locationInSuperview = [gestureRecognizer locationInView:piece.superview];
@@ -425,12 +421,17 @@
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
             [self startedGesture:gesture];
-            break; }
-        case UIGestureRecognizerStatePossible: { break; }
+            break; 
+        }
+        case UIGestureRecognizerStatePossible: { 
+            break;
+        }
         case UIGestureRecognizerStateCancelled: {
             [self endedGesture:gesture];break;
         } 
-        case UIGestureRecognizerStateFailed: {break;} 
+        case UIGestureRecognizerStateFailed: { 
+            break; 
+        } 
         case UIGestureRecognizerStateChanged: {
             [self modifiedGesture:gesture];
             break;
@@ -444,35 +445,28 @@
 
 - (void)doubleTapped:(UITapGestureRecognizer *)gesture {
     
-    switch (gesture.state) 
-    {
-        case UIGestureRecognizerStateBegan: 
-        {
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan: {
             self.beingDragged = YES;
             [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
             break; 
         }
-        case UIGestureRecognizerStatePossible: 
-        { 
+        case UIGestureRecognizerStatePossible: { 
             break; 
         }
-        case UIGestureRecognizerStateCancelled: 
-        {
+        case UIGestureRecognizerStateCancelled: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
             [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
             break;
         } 
-        case UIGestureRecognizerStateFailed: 
-        {
+        case UIGestureRecognizerStateFailed: {
             break;
         } 
-        case UIGestureRecognizerStateChanged: 
-        {
+        case UIGestureRecognizerStateChanged: {
             break;
         }
-        case UIGestureRecognizerStateEnded: 
-        {
+        case UIGestureRecognizerStateEnded: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
             [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
