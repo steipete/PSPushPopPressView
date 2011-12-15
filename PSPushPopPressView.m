@@ -114,11 +114,6 @@
     pushPopPressViewDelegate = nil;
 }
 
-// don't manipulate initialFrame inside the view
-- (void)setFrameInternal:(CGRect)frame {
-    [super setFrame:frame];
-}
-
 - (void)setInitialFrame:(CGRect)initialFrame {
     initialFrame_ = initialFrame;
 
@@ -160,14 +155,14 @@
         initialSuperview_ = self.superview;
         CGRect newFrame = [self.superview convertRect:initialFrame_ toView:rootView];
         [rootView addSubview:self];
-        [self setFrameInternal:newFrame];
+        [self setFrame:newFrame];
         viewChanged = YES;
     }else if(!enable) {
         if (initialSuperview_) {
             [initialSuperview_ addSubview:self];
             viewChanged = YES;
         }
-        [self setFrameInternal:initialFrame_];
+        [self setFrame:initialFrame_];
         initialSuperview_ = nil;
     }
     return viewChanged;
@@ -253,16 +248,16 @@
                          if (bounces) {
                              if (abs(bounceX) > 0 || abs(bounceY) > 0) {
                                  CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + bounceX + (widthDifference / 2.0), correctedInitialFrame.origin.y + bounceY + (heightDifference / 2.0), correctedInitialFrame.size.width + (widthDifference * -1), correctedInitialFrame.size.height + (heightDifference * -1));
-                                 [self setFrameInternal:targetFrame];
+                                 [self setFrame:targetFrame];
                              }else {
                                  // there's reason behind this madness. shadow freaks out when we come from fullscreen, but not if we had transforms.
                                  fullscreenAnimationActive_ = YES;
                                  CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + 3, correctedInitialFrame.origin.y + 3, correctedInitialFrame.size.width - 6, correctedInitialFrame.size.height - 6);
                                  //NSLog(@"targetFrame: %@ (superview: %@; initialSuperview: %@)", NSStringFromCGRect(targetFrame), self.superview, self.initialSuperview);
-                                 [self setFrameInternal:targetFrame];
+                                 [self setFrame:targetFrame];
                              }
                          }else {
-                             [self setFrameInternal:correctedInitialFrame];
+                             [self setFrame:correctedInitialFrame];
                          }
                      }
                      completion: ^(BOOL finished) {
@@ -272,7 +267,7 @@
                          if (bounces && finished) {
                              [UIView animateWithDuration: kPSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
                                                  options:UIViewAnimationOptionAllowUserInteraction animations: ^{
-                                                     [self setFrameInternal:correctedInitialFrame];
+                                                     [self setFrame:correctedInitialFrame];
                                                  } completion: ^(BOOL finished) {
                                                      if (finished && !self.isBeingDragged) {
                                                          [self detachViewToWindow:NO];
@@ -310,16 +305,16 @@
                          panTransform_ = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
                          if (bounces) {
-                             [self setFrameInternal:CGRectMake(windowBounds.origin.x - kPSFullscreenAnimationBounce, windowBounds.origin.y - kPSFullscreenAnimationBounce, windowBounds.size.width + kPSFullscreenAnimationBounce*2, windowBounds.size.height + kPSFullscreenAnimationBounce*2)];
+                             [self setFrame:CGRectMake(windowBounds.origin.x - kPSFullscreenAnimationBounce, windowBounds.origin.y - kPSFullscreenAnimationBounce, windowBounds.size.width + kPSFullscreenAnimationBounce*2, windowBounds.size.height + kPSFullscreenAnimationBounce*2)];
                          }else {
-                             [self setFrameInternal:[self windowBounds]];
+                             [self setFrame:[self windowBounds]];
                          }
                      }
                      completion:^(BOOL finished) {
                          windowBounds = [self windowBounds];
                          if (bounces && finished) {
                              [UIView animateWithDuration:kPSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-                                 [self setFrameInternal:windowBounds];
+                                 [self setFrame:windowBounds];
                              } completion:^(BOOL finished) {
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                      [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToFullscreenWindowFrame: self];
