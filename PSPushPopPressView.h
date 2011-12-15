@@ -48,6 +48,7 @@
     BOOL allowSingleTapSwitch_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
+    BOOL anchorPointUpdated;
 }
 
 /// the delegate for the PushPopPressView

@@ -223,8 +223,8 @@
         if (beingDragged_) {
             [self applyShadowAnimated:YES];
         }else {
-            BOOL animate = !self.isFullscreen && !fullscreenAnimationActive_;
-            [self removeShadowAnimated:animate];
+            //BOOL animate = !self.isFullscreen && !fullscreenAnimationActive_;
+            [self removeShadowAnimated:NO];//TODO: removing this shadow animation fixes the (shadow) problem when coming back from fullscreen, that's a good give-and-take for me. The bool was nice writted but I think something messed up in other parts of the code and the check that creates the bool `animate' are messed up so I fixed that the simple way.
         }
     }
 }
@@ -332,11 +332,13 @@
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                      [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                                  }
+                                 anchorPointUpdated = NO;
                              }];
                          }else {
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                  [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                              }
+                             anchorPointUpdated = NO;
                          }
                      }];
 }
@@ -351,8 +353,12 @@
 
 // disrupt gesture recognizer, which continues to receive touch events even as we set minimumNumberOfTouches to two.
 - (void)resetGestureRecognizers {
-    panRecognizer_.enabled = NO;
-    panRecognizer_.enabled = YES;
+    
+    for(UIGestureRecognizer *aGestRec in [self gestureRecognizers]){
+        [aGestRec setEnabled:NO];
+        [aGestRec setEnabled:YES];
+    }
+    
 }
 
 - (void)startedGesture:(UIGestureRecognizer *)gesture {
@@ -407,13 +413,16 @@
 // scale and rotation transforms are applied relative to the layer's anchor point
 // this method moves a gesture recognizer's view's anchor point between the user's fingers
 - (void)adjustAnchorPointForGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
-    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+    
+    if (!anchorPointUpdated)
+    {
         UIView *piece = gestureRecognizer.view;
         CGPoint locationInView = [gestureRecognizer locationInView:piece];
         CGPoint locationInSuperview = [gestureRecognizer locationInView:piece.superview];
 
         piece.layer.anchorPoint = CGPointMake(locationInView.x / piece.bounds.size.width, locationInView.y / piece.bounds.size.height);
         piece.center = locationInSuperview;
+        anchorPointUpdated = YES; 
     }
 }
 
@@ -426,10 +435,9 @@
             break; }
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: {
-            [self endedGesture:gesture];
-        } break;
-        case UIGestureRecognizerStateFailed: {
-        } break;
+            [self endedGesture:gesture];break;
+        } 
+        case UIGestureRecognizerStateFailed: {break;} 
         case UIGestureRecognizerStateChanged: {
             [self modifiedGesture:gesture];
             break;
