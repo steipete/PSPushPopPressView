@@ -227,9 +227,6 @@
         bounceX = tmp;
     }
 
-    __block CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
-    CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
-    CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
     self.fullscreen = NO;
 
     if ([self.pushPopPressViewDelegate respondsToSelector:@selector(pushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
@@ -244,9 +241,14 @@
                          panTransform_ = CGAffineTransformIdentity;
                          scaleTransform_ = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
+                         
+                         CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
 
                          if (bounces) {
                              if (abs(bounceX) > 0 || abs(bounceY) > 0) {
+                                 CGFloat widthDifference = (self.frame.size.width - correctedInitialFrame.size.width) * 0.05;
+                                 CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
+
                                  CGRect targetFrame = CGRectMake(correctedInitialFrame.origin.x + bounceX + (widthDifference / 2.0), correctedInitialFrame.origin.y + bounceY + (heightDifference / 2.0), correctedInitialFrame.size.width + (widthDifference * -1), correctedInitialFrame.size.height + (heightDifference * -1));
                                  [self setFrame:targetFrame];
                              }else {
@@ -263,10 +265,10 @@
                      completion: ^(BOOL finished) {
                          //NSLog(@"moveViewToOriginalPositionAnimated [complete] finished:%d, bounces:%d", finished, bounces);
                          fullscreenAnimationActive_ = NO;
-                         correctedInitialFrame = [self superviewCorrectedInitialFrame];
                          if (bounces && finished) {
                              [UIView animateWithDuration: kPSAnimationMoveToOriginalPositionDuration/2 delay: 0.0
                                                  options:UIViewAnimationOptionAllowUserInteraction animations: ^{
+                                                     CGRect correctedInitialFrame = [self superviewCorrectedInitialFrame];
                                                      [self setFrame:correctedInitialFrame];
                                                  } completion: ^(BOOL finished) {
                                                      if (finished && !self.isBeingDragged) {
@@ -278,7 +280,7 @@
                                                  }];
                          }else {
                              if (!self.isBeingDragged) {
-                                 [self detachViewToWindow:NO];
+                                 //[self detachViewToWindow:NO];
                              }
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToOriginalFrame:)]) {
                                  [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToOriginalFrame: self];
@@ -295,7 +297,6 @@
     BOOL viewChanged = [self detachViewToWindow:YES];
     self.fullscreen = YES;
 
-    __block CGRect windowBounds = [self windowBounds];
     [UIView animateWithDuration: animated ? kPSAnimationDuration : 0.f delay: 0.0
      // view hierarchy change needs some time propagating, don't use UIViewAnimationOptionBeginFromCurrentState when just changed
                         options:(viewChanged ? 0 : UIViewAnimationOptionBeginFromCurrentState) | UIViewAnimationOptionAllowUserInteraction
@@ -304,15 +305,17 @@
                          rotateTransform_ = CGAffineTransformIdentity;
                          panTransform_ = CGAffineTransformIdentity;
                          self.transform = CGAffineTransformIdentity;
+                         CGRect windowBounds = [self windowBounds];
                          if (bounces) {
                              [self setFrame:CGRectMake(windowBounds.origin.x - kPSFullscreenAnimationBounce, windowBounds.origin.y - kPSFullscreenAnimationBounce, windowBounds.size.width + kPSFullscreenAnimationBounce*2, windowBounds.size.height + kPSFullscreenAnimationBounce*2)];
                          }else {
-                             [self setFrame:[self windowBounds]];
+                             [self setFrame:windowBounds];
                          }
                      }
-                     completion:^(BOOL finished) {
-                         windowBounds = [self windowBounds];
+                     completion:^(BOOL finished) {                         
                          if (bounces && finished) {
+                             CGRect windowBounds = [self windowBounds];
+                             [self detachViewToWindow:YES];
                              [UIView animateWithDuration:kPSAnimationDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
                                  [self setFrame:windowBounds];
                              } completion:^(BOOL finished) {
