@@ -232,7 +232,7 @@
     CGFloat heightDifference = (self.frame.size.height - correctedInitialFrame.size.height) * 0.05;
     self.fullscreen = NO;
 
-    if ([self.pushPopPressViewDelegate respondsToSelector:@selector(PSPushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
+    if ([self.pushPopPressViewDelegate respondsToSelector:@selector(pushPopPressViewWillAnimateToOriginalFrame:duration:)]) {
         [self.pushPopPressViewDelegate pushPopPressViewWillAnimateToOriginalFrame:self duration:kPSAnimationMoveToOriginalPositionDuration*1.5f];
     }
 
@@ -288,7 +288,7 @@
 }
 
 - (void)moveToFullscreenAnimated:(BOOL)animated bounces:(BOOL)bounces {
-    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(PSPushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
+    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewWillAnimateToFullscreenWindowFrame:duration:)]) {
         [self.pushPopPressViewDelegate pushPopPressViewWillAnimateToFullscreenWindowFrame: self duration: kPSAnimationDuration];
     }
 
@@ -477,9 +477,17 @@
                 [self.pushPopPressViewDelegate pushPopPressViewDidReceiveTap: self];
             }
 
-            if (!self.isFullscreen) {
+             if (!self.isFullscreen) {
+                if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame:)]) {
+                    if ([self.pushPopPressViewDelegate pushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: self] == NO) return;
+                }
+
                 [self moveToFullscreenWindowAnimated:YES];
             } else {
+                if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
+                    if ([self.pushPopPressViewDelegate pushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
+                }
+
                 [self moveToOriginalFrameAnimated:YES];
             }
         }
@@ -508,19 +516,11 @@
 - (void)moveToFullscreenWindowAnimated:(BOOL)animated {
     if (self.isFullscreen) return;
 
-    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(PSPushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame:)]) {
-        if ([self.pushPopPressViewDelegate pushPopPressViewShouldAllowTapToAnimateToFullscreenWindowFrame: self] == NO) return;
-    }
-
     [self moveToFullscreenAnimated:animated bounces:YES];
 }
 
 - (void)moveToOriginalFrameAnimated:(BOOL)animated {
     if (self.isFullscreen == NO) return;
-
-    if ([self.pushPopPressViewDelegate respondsToSelector: @selector(PSPushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
-        if ([self.pushPopPressViewDelegate pushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
-    }
 
     [self moveViewToOriginalPositionAnimated:animated bounces:YES];
 }
