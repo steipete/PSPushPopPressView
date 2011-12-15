@@ -84,7 +84,14 @@
         tapRecognizer_.delaysTouchesEnded = NO;
         [self addGestureRecognizer:tapRecognizer_];
 
-        currentTouches_ = [[NSMutableSet alloc] init];
+        doubleTouchRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action: @selector(doubleTapped:)];
+        doubleTouchRecognizer.delegate = self;
+        doubleTouchRecognizer.cancelsTouchesInView = NO;
+        doubleTouchRecognizer.delaysTouchesBegan = NO;
+        doubleTouchRecognizer.delaysTouchesEnded = NO;
+        doubleTouchRecognizer.numberOfTouchesRequired = 2.0f;
+        doubleTouchRecognizer.minimumPressDuration = 0.01f;
+        [self addGestureRecognizer:doubleTouchRecognizer];
 
         self.layer.shadowRadius = 15.0f;
         self.layer.shadowOffset = CGSizeMake(5.0f, 5.0f);
@@ -106,7 +113,6 @@
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     pushPopPressViewDelegate = nil;
-    currentTouches_ = nil;
 }
 
 // don't manipulate initialFrame inside the view
@@ -145,19 +151,6 @@
     UIView *rootView = [self rootView];
     CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame_ fromView:initialSuperview_];
     return superviewCorrectedInitialFrame;
-}
-
-- (void)willMoveToSuperview:(UIView *)newSuperview {
-    if (!newSuperview && self.isBeingDragged) {
-        self.beingDragged = NO;
-
-        // do we need to call the delegate?
-        BOOL notYetEnded = [currentTouches_ count] >= 2;
-        if (notYetEnded) {
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
-        }
-        [currentTouches_ removeAllObjects];
-    }
 }
 
 - (BOOL)detachViewToWindow:(BOOL)enable {
@@ -449,6 +442,45 @@
     }
 }
 
+- (void)doubleTapped:(UITapGestureRecognizer *)gesture {
+    
+    switch (gesture.state) 
+    {
+        case UIGestureRecognizerStateBegan: 
+        {
+            self.beingDragged = YES;
+            [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
+            break; 
+        }
+        case UIGestureRecognizerStatePossible: 
+        { 
+            break; 
+        }
+        case UIGestureRecognizerStateCancelled: 
+        {
+            self.beingDragged = NO;
+            [self resetGestureRecognizers];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
+            break;
+        } 
+        case UIGestureRecognizerStateFailed: 
+        {
+            break;
+        } 
+        case UIGestureRecognizerStateChanged: 
+        {
+            break;
+        }
+        case UIGestureRecognizerStateEnded: 
+        {
+            self.beingDragged = NO;
+            [self resetGestureRecognizers];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
+            break;
+        }
+    }
+}
+
 - (void)tap:(UITapGestureRecognizer *)tap {
     if (self.allowSingleTapSwitch) {
         if (tap.state == UIGestureRecognizerStateEnded) {
@@ -482,39 +514,6 @@
         return NO;
     }
     return YES;
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    // sometimes, the system gets confused and doesn't send us touchesEnded/touchesCancelled-Events. Compensate and filter cancelled touches.
-    NSSet *cancelledTouches = [currentTouches_ filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"phase = %d", UITouchPhaseCancelled]];
-    [currentTouches_ minusSet:cancelledTouches];
-
-    BOOL notYetStarted = [currentTouches_ count] < 2;
-    [currentTouches_ unionSet:touches];
-    if (notYetStarted && [currentTouches_ count] >= 2) {
-        self.beingDragged = YES;
-        [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
-    }
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    self.beingDragged = NO;
-    BOOL notYetEnded = [currentTouches_ count] >= 2;
-    [currentTouches_ minusSet:touches];
-    if (notYetEnded && [currentTouches_ count] < 2) {
-        [self resetGestureRecognizers];
-        [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
-    }
-}
-
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    self.beingDragged = NO;
-    BOOL notYetEnded = [currentTouches_ count] >= 2;
-    [currentTouches_ minusSet:touches];
-    if (notYetEnded && [currentTouches_ count] < 2) {
-        [self resetGestureRecognizers];
-        [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
-    }
 }
 
 - (void)moveToFullscreenWindowAnimated:(BOOL)animated {
