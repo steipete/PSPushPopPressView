@@ -84,7 +84,14 @@
         tapRecognizer_.delaysTouchesEnded = NO;
         [self addGestureRecognizer:tapRecognizer_];
 
-        currentTouches_ = [[NSMutableSet alloc] init];
+        doubleTouchRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action: @selector(doubleTapped:)];
+        doubleTouchRecognizer.delegate = self;
+        doubleTouchRecognizer.cancelsTouchesInView = NO;
+        doubleTouchRecognizer.delaysTouchesBegan = NO;
+        doubleTouchRecognizer.delaysTouchesEnded = NO;
+        doubleTouchRecognizer.numberOfTouchesRequired = 2.0f;
+        doubleTouchRecognizer.minimumPressDuration = 0.01f;
+        [self addGestureRecognizer:doubleTouchRecognizer];
 
         self.layer.shadowRadius = 15.0f;
         self.layer.shadowOffset = CGSizeMake(5.0f, 5.0f);
@@ -106,7 +113,6 @@
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     pushPopPressViewDelegate = nil;
-    currentTouches_ = nil;
 }
 
 // don't manipulate initialFrame inside the view
@@ -145,19 +151,6 @@
     UIView *rootView = [self rootView];
     CGRect superviewCorrectedInitialFrame = [rootView convertRect:initialFrame_ fromView:initialSuperview_];
     return superviewCorrectedInitialFrame;
-}
-
-- (void)willMoveToSuperview:(UIView *)newSuperview {
-    if (!newSuperview && self.isBeingDragged) {
-        self.beingDragged = NO;
-
-        // do we need to call the delegate?
-        BOOL notYetEnded = [currentTouches_ count] >= 2;
-        if (notYetEnded) {
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
-        }
-        [currentTouches_ removeAllObjects];
-    }
 }
 
 - (BOOL)detachViewToWindow:(BOOL)enable {
@@ -223,8 +216,8 @@
         if (beingDragged_) {
             [self applyShadowAnimated:YES];
         }else {
-            BOOL animate = !self.isFullscreen && !fullscreenAnimationActive_;
-            [self removeShadowAnimated:animate];
+            //BOOL animate = !self.isFullscreen && !fullscreenAnimationActive_;
+            [self removeShadowAnimated:NO];//TODO: removing this shadow animation fixes the (shadow) problem when coming back from fullscreen, that's a good give-and-take for me. The bool was nice writted but I think something messed up in other parts of the code and the check that creates the bool `animate' are messed up so I fixed that the simple way.
         }
     }
 }
@@ -332,11 +325,13 @@
                                  if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                      [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                                  }
+                                 anchorPointUpdated = NO;
                              }];
                          }else {
                              if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidAnimateToFullscreenWindowFrame:)]) {
                                  [self.pushPopPressViewDelegate pushPopPressViewDidAnimateToFullscreenWindowFrame: self];
                              }
+                             anchorPointUpdated = NO;
                          }
                      }];
 }
@@ -351,8 +346,12 @@
 
 // disrupt gesture recognizer, which continues to receive touch events even as we set minimumNumberOfTouches to two.
 - (void)resetGestureRecognizers {
-    panRecognizer_.enabled = NO;
-    panRecognizer_.enabled = YES;
+    
+    for(UIGestureRecognizer *aGestRec in [self gestureRecognizers]){
+        [aGestRec setEnabled:NO];
+        [aGestRec setEnabled:YES];
+    }
+    
 }
 
 - (void)startedGesture:(UIGestureRecognizer *)gesture {
@@ -407,13 +406,16 @@
 // scale and rotation transforms are applied relative to the layer's anchor point
 // this method moves a gesture recognizer's view's anchor point between the user's fingers
 - (void)adjustAnchorPointForGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
-    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+    
+    if (!anchorPointUpdated)
+    {
         UIView *piece = gestureRecognizer.view;
         CGPoint locationInView = [gestureRecognizer locationInView:piece];
         CGPoint locationInSuperview = [gestureRecognizer locationInView:piece.superview];
 
         piece.layer.anchorPoint = CGPointMake(locationInView.x / piece.bounds.size.width, locationInView.y / piece.bounds.size.height);
         piece.center = locationInSuperview;
+        anchorPointUpdated = YES; 
     }
 }
 
@@ -426,16 +428,54 @@
             break; }
         case UIGestureRecognizerStatePossible: { break; }
         case UIGestureRecognizerStateCancelled: {
-            [self endedGesture:gesture];
-        } break;
-        case UIGestureRecognizerStateFailed: {
-        } break;
+            [self endedGesture:gesture];break;
+        } 
+        case UIGestureRecognizerStateFailed: {break;} 
         case UIGestureRecognizerStateChanged: {
             [self modifiedGesture:gesture];
             break;
         }
         case UIGestureRecognizerStateEnded: {
             [self endedGesture:gesture];
+            break;
+        }
+    }
+}
+
+- (void)doubleTapped:(UITapGestureRecognizer *)gesture {
+    
+    switch (gesture.state) 
+    {
+        case UIGestureRecognizerStateBegan: 
+        {
+            self.beingDragged = YES;
+            [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
+            break; 
+        }
+        case UIGestureRecognizerStatePossible: 
+        { 
+            break; 
+        }
+        case UIGestureRecognizerStateCancelled: 
+        {
+            self.beingDragged = NO;
+            [self resetGestureRecognizers];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
+            break;
+        } 
+        case UIGestureRecognizerStateFailed: 
+        {
+            break;
+        } 
+        case UIGestureRecognizerStateChanged: 
+        {
+            break;
+        }
+        case UIGestureRecognizerStateEnded: 
+        {
+            self.beingDragged = NO;
+            [self resetGestureRecognizers];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
             break;
         }
     }
@@ -474,39 +514,6 @@
         return NO;
     }
     return YES;
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    // sometimes, the system gets confused and doesn't send us touchesEnded/touchesCancelled-Events. Compensate and filter cancelled touches.
-    NSSet *cancelledTouches = [currentTouches_ filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"phase = %d", UITouchPhaseCancelled]];
-    [currentTouches_ minusSet:cancelledTouches];
-
-    BOOL notYetStarted = [currentTouches_ count] < 2;
-    [currentTouches_ unionSet:touches];
-    if (notYetStarted && [currentTouches_ count] >= 2) {
-        self.beingDragged = YES;
-        [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
-    }
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    self.beingDragged = NO;
-    BOOL notYetEnded = [currentTouches_ count] >= 2;
-    [currentTouches_ minusSet:touches];
-    if (notYetEnded && [currentTouches_ count] < 2) {
-        [self resetGestureRecognizers];
-        [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
-    }
-}
-
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    self.beingDragged = NO;
-    BOOL notYetEnded = [currentTouches_ count] >= 2;
-    [currentTouches_ minusSet:touches];
-    if (notYetEnded && [currentTouches_ count] < 2) {
-        [self resetGestureRecognizers];
-        [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
-    }
 }
 
 - (void)moveToFullscreenWindowAnimated:(BOOL)animated {
