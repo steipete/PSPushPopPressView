@@ -39,15 +39,16 @@
 
 @interface PSPushPopPressView : UIView <UIGestureRecognizerDelegate> {
     UITapGestureRecognizer* tapRecognizer_;
+    UILongPressGestureRecognizer* doubleTouchRecognizer;
     UIPanGestureRecognizer* panRecognizer_;
     CGAffineTransform scaleTransform_;
     CGAffineTransform rotateTransform_;
     CGAffineTransform panTransform_;
-    NSMutableSet *currentTouches_;
     CGRect initialFrame_;
     BOOL allowSingleTapSwitch_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
+    BOOL anchorPointUpdated;
 }
 
 /// the delegate for the PushPopPressView
