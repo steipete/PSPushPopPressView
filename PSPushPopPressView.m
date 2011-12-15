@@ -42,8 +42,8 @@
     }
 }
 
-- (id)initWithFrame: (CGRect) frame_ {
-    if ((self = [super initWithFrame: frame_])) {
+- (id)initWithFrame:(CGRect)frame_ {
+    if ((self = [super initWithFrame:frame_])) {
         self.userInteractionEnabled = YES;
         self.multipleTouchEnabled = YES;
 
