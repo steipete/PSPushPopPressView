@@ -88,8 +88,8 @@
         doubleTouchRecognizer.cancelsTouchesInView = NO;
         doubleTouchRecognizer.delaysTouchesBegan = NO;
         doubleTouchRecognizer.delaysTouchesEnded = NO;
-        doubleTouchRecognizer.numberOfTouchesRequired = 2.0f;
-        doubleTouchRecognizer.minimumPressDuration = 0.01f;
+        doubleTouchRecognizer.numberOfTouchesRequired = 2;
+        doubleTouchRecognizer.minimumPressDuration = 0.f;
         [self addGestureRecognizer:doubleTouchRecognizer];
 
         self.layer.shadowRadius = 15.0f;
@@ -414,10 +414,10 @@
 }
 
 - (void)pinchPanRotate:(UIGestureRecognizer *)gesture {
-    [self adjustAnchorPointForGestureRecognizer:gesture];
     
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
+            [self adjustAnchorPointForGestureRecognizer:gesture];
             [self startedGesture:gesture];
             break; 
         }
@@ -425,9 +425,12 @@
             break;
         }
         case UIGestureRecognizerStateCancelled: {
-            [self endedGesture:gesture];break;
+            [self endedGesture:gesture];
+            anchorPointUpdated = NO;
+            break;
         } 
         case UIGestureRecognizerStateFailed: { 
+            anchorPointUpdated = NO;
             break; 
         } 
         case UIGestureRecognizerStateChanged: {
@@ -435,6 +438,7 @@
             break;
         }
         case UIGestureRecognizerStateEnded: {
+            anchorPointUpdated = NO;
             [self endedGesture:gesture];
             break;
         }
