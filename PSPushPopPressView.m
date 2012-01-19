@@ -53,21 +53,21 @@
         initialFrame_ = frame_;
         allowSingleTapSwitch_ = YES;
 
-        UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
+        UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchPanRotate:)];
         pinchRecognizer.cancelsTouchesInView = NO;
         pinchRecognizer.delaysTouchesBegan = NO;
         pinchRecognizer.delaysTouchesEnded = NO;
         pinchRecognizer.delegate = self;
         [self addGestureRecognizer: pinchRecognizer];
 
-        UIRotationGestureRecognizer* rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
+        UIRotationGestureRecognizer* rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(pinchPanRotate:)];
         rotationRecognizer.cancelsTouchesInView = NO;
         rotationRecognizer.delaysTouchesBegan = NO;
         rotationRecognizer.delaysTouchesEnded = NO;
         rotationRecognizer.delegate = self;
         [self addGestureRecognizer: rotationRecognizer];
 
-        panRecognizer_ = [[UIPanGestureRecognizer alloc] initWithTarget: self action: @selector(pinchPanRotate:)];
+        panRecognizer_ = [[UIPanGestureRecognizer alloc] initWithTarget: self action:@selector(pinchPanRotate:)];
         panRecognizer_.cancelsTouchesInView = NO;
         panRecognizer_.delaysTouchesBegan = NO;
         panRecognizer_.delaysTouchesEnded = NO;
@@ -76,14 +76,14 @@
         panRecognizer_.maximumNumberOfTouches = 2;
         [self addGestureRecognizer:panRecognizer_];
 
-        tapRecognizer_ = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tap:)];
+        tapRecognizer_ = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(tap:)];
         tapRecognizer_.delegate = self;
         tapRecognizer_.cancelsTouchesInView = NO;
         tapRecognizer_.delaysTouchesBegan = NO;
         tapRecognizer_.delaysTouchesEnded = NO;
         [self addGestureRecognizer:tapRecognizer_];
 
-        doubleTouchRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action: @selector(doubleTapped:)];
+        doubleTouchRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapped:)];
         doubleTouchRecognizer.delegate = self;
         doubleTouchRecognizer.cancelsTouchesInView = NO;
         doubleTouchRecognizer.delaysTouchesBegan = NO;
@@ -415,7 +415,7 @@
 
 - (void)pinchPanRotate:(UIGestureRecognizer *)gesture {
     [self adjustAnchorPointForGestureRecognizer:gesture];
-
+    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
             [self startedGesture:gesture];
@@ -442,11 +442,10 @@
 }
 
 - (void)doubleTapped:(UITapGestureRecognizer *)gesture {
-    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
             self.beingDragged = YES;
-            [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation: self];
+            [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation:self];
             break; 
         }
         case UIGestureRecognizerStatePossible: { 
@@ -455,7 +454,7 @@
         case UIGestureRecognizerStateCancelled: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
             break;
         } 
         case UIGestureRecognizerStateFailed: {
@@ -467,7 +466,7 @@
         case UIGestureRecognizerStateEnded: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation: self];
+            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
             break;
         }
     }
