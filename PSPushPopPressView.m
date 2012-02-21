@@ -449,7 +449,9 @@
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
             self.beingDragged = YES;
-            [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation:self];
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidStartManipulation:)]) {
+                [self.pushPopPressViewDelegate pushPopPressViewDidStartManipulation:self];
+            }
             break; 
         }
         case UIGestureRecognizerStatePossible: { 
@@ -458,7 +460,9 @@
         case UIGestureRecognizerStateCancelled: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidFinishManipulation:)]) {
+                [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
+            }
             break;
         } 
         case UIGestureRecognizerStateFailed: {
@@ -470,7 +474,9 @@
         case UIGestureRecognizerStateEnded: {
             self.beingDragged = NO;
             [self resetGestureRecognizers];
-            [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidFinishManipulation:)]) {
+                [self.pushPopPressViewDelegate pushPopPressViewDidFinishManipulation:self];
+            }
             break;
         }
     }
