@@ -51,6 +51,7 @@
         rotateTransform_ = CGAffineTransformIdentity;
         panTransform_ = CGAffineTransformIdentity;
         initialFrame_ = frame_;
+		initialIndex_ = 0;
         allowSingleTapSwitch_ = YES;
 
         UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchPanRotate:)];
@@ -152,6 +153,7 @@
     UIView *rootView = [self rootView];
 
     if (enable && !initialSuperview_) {
+		initialIndex_ = [self.superview.subviews indexOfObject:self];
         initialSuperview_ = self.superview;
         CGRect newFrame = [self.superview convertRect:initialFrame_ toView:rootView];
         [rootView addSubview:self];
@@ -159,7 +161,7 @@
         viewChanged = YES;
     }else if(!enable) {
         if (initialSuperview_) {
-            [initialSuperview_ addSubview:self];
+            [initialSuperview_ insertSubview:self atIndex:initialIndex_];
             viewChanged = YES;
         }
         [self setFrame:initialFrame_];
