@@ -45,6 +45,7 @@
     CGAffineTransform rotateTransform_;
     CGAffineTransform panTransform_;
     CGRect initialFrame_;
+	NSInteger initialIndex_;
     BOOL allowSingleTapSwitch_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
