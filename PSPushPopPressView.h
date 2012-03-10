@@ -49,6 +49,7 @@
     BOOL allowSingleTapSwitch_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
+	BOOL keepShadow_;
     BOOL fullscreenAnimationActive_;
     BOOL anchorPointUpdated;
 }
@@ -71,6 +72,8 @@
 /// if true, [UIScreen mainScreen] is used for coordinates (vs rootView)
 @property (nonatomic, assign) BOOL ignoreStatusBar;
 
+/// if true, shadow does not appear/disappear when animating
+@property (nonatomic, assign) BOOL keepShadow;
 
 /// animate/move to fullscreen
 - (void)moveToFullscreenWindowAnimated:(BOOL)animated;
