@@ -34,6 +34,7 @@
 @synthesize initialFrame = initialFrame_;
 @synthesize allowSingleTapSwitch = allowSingleTapSwitch_;
 @synthesize ignoreStatusBar = ignoreStatusBar_;
+@synthesize keepShadow = keepShadow_;
 
 // adapt frame for fullscreen
 - (void)detectOrientation {
@@ -53,6 +54,7 @@
         initialFrame_ = frame_;
 		initialIndex_ = 0;
         allowSingleTapSwitch_ = YES;
+		keepShadow_ = NO;
 
         UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchPanRotate:)];
         pinchRecognizer.cancelsTouchesInView = NO;
@@ -175,6 +177,7 @@
 }
 
 - (void)applyShadowAnimated:(BOOL)animated {
+	if (keepShadow_) return;
     if(animated) {
         CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"shadowOpacity"];
         anim.fromValue = [NSNumber numberWithFloat:0.0f];
@@ -190,6 +193,7 @@
 }
 
 - (void)removeShadowAnimated:(BOOL)animated {
+	if (keepShadow_) return;
     // TODO: sometimes animates crazy, shadowOpacity animation losses shadowPath transform on certain conditions
     // shadow should also use a "lightSource", maybe it's easier to make a completely custom shadow view.
     if (animated) {
