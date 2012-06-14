@@ -94,6 +94,14 @@
         doubleTouchRecognizer.numberOfTouchesRequired = 2;
         doubleTouchRecognizer.minimumPressDuration = 0.f;
         [self addGestureRecognizer:doubleTouchRecognizer];
+        
+        swipeRecognizer_ = [[UISwipeGestureRecognizer alloc] initWithTarget:self action: @selector(swipe:)];
+        swipeRecognizer_.delegate = self;
+        swipeRecognizer_.cancelsTouchesInView = NO;
+        swipeRecognizer_.delaysTouchesBegan = NO;
+        swipeRecognizer_.delaysTouchesEnded = NO;
+        swipeRecognizer_.direction = UISwipeGestureRecognizerDirectionRight | UISwipeGestureRecognizerDirectionLeft | UISwipeGestureRecognizerDirectionUp | UISwipeGestureRecognizerDirectionDown;
+        [self addGestureRecognizer:swipeRecognizer_];
 
         self.layer.shadowRadius = 15.0f;
         self.layer.shadowOffset = CGSizeMake(5.0f, 5.0f);
@@ -508,6 +516,19 @@
 
                 [self moveToOriginalFrameAnimated:YES];
             }
+        }
+    }
+}
+
+- (void)swipe:(UISwipeGestureRecognizer *)swipe {
+    if (swipe.state == UIGestureRecognizerStateEnded) {
+        
+        if (self.isFullscreen) {
+            if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewShouldAllowTapToAnimateToOriginalFrame:)]) {
+                if ([self.pushPopPressViewDelegate pushPopPressViewShouldAllowTapToAnimateToOriginalFrame: self] == NO) return;
+            }
+            
+            [self moveToOriginalFrameAnimated:YES];
         }
     }
 }

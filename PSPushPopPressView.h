@@ -41,6 +41,7 @@
     UITapGestureRecognizer* tapRecognizer_;
     UILongPressGestureRecognizer* doubleTouchRecognizer;
     UIPanGestureRecognizer* panRecognizer_;
+    UISwipeGestureRecognizer* swipeRecognizer_;
     CGAffineTransform scaleTransform_;
     CGAffineTransform rotateTransform_;
     CGAffineTransform panTransform_;
