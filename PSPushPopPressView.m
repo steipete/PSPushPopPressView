@@ -51,7 +51,6 @@
         scaleTransform_ = CGAffineTransformIdentity;
         rotateTransform_ = CGAffineTransformIdentity;
         panTransform_ = CGAffineTransformIdentity;
-        initialFrame_ = frame_;
 		initialIndex_ = 0;
         allowSingleTapSwitch_ = YES;
 		keepShadow_ = NO;
@@ -115,6 +114,14 @@
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     pushPopPressViewDelegate = nil;
+}
+
+- (void) setFrame:(CGRect)frame
+{
+	[super setFrame:frame];
+	
+	if(![self.superview isEqual:[self rootView]])
+		initialFrame_ = self.frame;
 }
 
 - (void)setInitialFrame:(CGRect)initialFrame {

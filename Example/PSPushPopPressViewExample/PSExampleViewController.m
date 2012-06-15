@@ -36,7 +36,8 @@
 
     // create the push pop press container
     CGRect firstRect = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? CGRectMake(140, 40, 500, 400) : CGRectMake(10, 10, 300, 300);
-    pushPopPressView_ = [[PSPushPopPressView alloc] initWithFrame:firstRect];
+    pushPopPressView_ = [[PSPushPopPressView alloc] init];
+	pushPopPressView_.frame = firstRect;
     pushPopPressView_.pushPopPressViewDelegate = self;
     [containerView_ addSubview:pushPopPressView_];
 
