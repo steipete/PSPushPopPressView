@@ -33,6 +33,7 @@
 @synthesize fullscreen = fullscreen_;
 @synthesize initialFrame = initialFrame_;
 @synthesize allowSingleTapSwitch = allowSingleTapSwitch_;
+@synthesize allowFullscreenInteraction = allowFullscreenInteraction_;
 @synthesize ignoreStatusBar = ignoreStatusBar_;
 @synthesize keepShadow = keepShadow_;
 
@@ -54,6 +55,7 @@
         initialFrame_ = frame_;
 		initialIndex_ = 0;
         allowSingleTapSwitch_ = YES;
+        allowFullscreenInteraction_ = YES;
 		keepShadow_ = NO;
 
         UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchPanRotate:)];
@@ -428,6 +430,8 @@
 }
 
 - (void)pinchPanRotate:(UIGestureRecognizer *)gesture {
+    if (self.isFullscreen && !self.allowFullscreenInteraction)
+        return;
     
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
@@ -460,6 +464,9 @@
 }
 
 - (void)doubleTapped:(UITapGestureRecognizer *)gesture {
+    if (self.isFullscreen && !self.allowFullscreenInteraction)
+        return;
+    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan: {
             self.beingDragged = YES;
@@ -497,6 +504,9 @@
 }
 
 - (void)tap:(UITapGestureRecognizer *)tap {
+    if (self.isFullscreen && !self.allowFullscreenInteraction)
+        return;
+    
     if (self.allowSingleTapSwitch) {
         if (tap.state == UIGestureRecognizerStateEnded) {
             if ([self.pushPopPressViewDelegate respondsToSelector: @selector(pushPopPressViewDidReceiveTap:)]) {
@@ -521,6 +531,9 @@
 }
 
 - (void)swipe:(UISwipeGestureRecognizer *)swipe {
+    if (self.isFullscreen && !self.allowFullscreenInteraction)
+        return;
+    
     if (swipe.state == UIGestureRecognizerStateEnded) {
         
         if (self.isFullscreen) {
@@ -534,6 +547,10 @@
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    // if in fullscreen and fullscreen interaction is disabled, allow simultaneous recognition
+    if (self.isFullscreen && !self.allowFullscreenInteraction)
+        return YES;
+    
     // if the gesture recognizers's view isn't one of our pieces, don't allow simultaneous recognition
     if (gestureRecognizer.view != self)
         return NO;
