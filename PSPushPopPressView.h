@@ -41,12 +41,14 @@
     UITapGestureRecognizer* tapRecognizer_;
     UILongPressGestureRecognizer* doubleTouchRecognizer;
     UIPanGestureRecognizer* panRecognizer_;
+    UISwipeGestureRecognizer* swipeRecognizer_;
     CGAffineTransform scaleTransform_;
     CGAffineTransform rotateTransform_;
     CGAffineTransform panTransform_;
     CGRect initialFrame_;
 	NSInteger initialIndex_;
     BOOL allowSingleTapSwitch_;
+    BOOL allowFullscreenInteraction_;
     BOOL fullscreen_;
     BOOL ignoreStatusBar_;
 	BOOL keepShadow_;
@@ -68,6 +70,9 @@
 
 /// allow mode switching via single tap. Defaults to YES.
 @property (nonatomic, assign) BOOL allowSingleTapSwitch;
+
+/// allow user interaction in fullscreen. Defaults to YES.
+@property (nonatomic, assign) BOOL allowFullscreenInteraction;
 
 /// if true, [UIScreen mainScreen] is used for coordinates (vs rootView)
 @property (nonatomic, assign) BOOL ignoreStatusBar;
